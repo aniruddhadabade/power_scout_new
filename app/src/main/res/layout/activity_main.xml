@@ -1,19 +1,95 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:background="@drawable/bground"
+    android:padding="16dp">
 
+    <!-- Welcome Message -->
     <TextView
+        android:id="@+id/welcomeMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:text="Welcome\nto Power Scout!"
+        android:textColor="#FFFFFF"
+        android:textSize="30sp"
+        android:textStyle="bold" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Chart Icon -->
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="120dp"
+        android:layout_height="140dp"
+        android:layout_below="@id/welcomeMessage"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="140dp"
+        android:contentDescription="Chart Icon"
+        android:elevation="4dp"
+        android:src="@drawable/ic_chart"
+        android:background="#FFFFFF" />
+
+    <!-- Welcome Text -->
+    <TextView
+        android:id="@+id/welcomeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/icon"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="24dp"
+        android:text="Welcome to Dashboard!"
+        android:textColor="#140A0A"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <!-- Subtitle -->
+    <TextView
+        android:id="@+id/subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/welcomeText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="12dp"
+        android:text="Real-time insights for your energy efficiency."
+        android:textStyle="bold"
+        android:textColor="#231515"
+        android:textSize="16dp" />
+
+    <!-- Log In Button -->
+    <Button
+        android:id="@+id/loginbutton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/subtitle"
+        android:layout_centerHorizontal="true"
+        android:layout_marginHorizontal="60dp"
+        android:layout_marginTop="40dp"
+        android:elevation="4dp"
+        android:paddingVertical="15dp"
+        android:text="Log In"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textColor="#EDF1F8"
+        android:backgroundTint="#247BD1" />
+
+    <!-- Sign Up Button -->
+    <Button
+        android:id="@+id/signinbutton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/loginbutton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginHorizontal="60dp"
+        android:layout_marginTop="15dp"
+        android:elevation="4dp"
+        android:paddingVertical="15dp"
+        android:text="Sign In"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textColor="#EDF1F8"
+        android:backgroundTint="#247BD1" />
+
+</RelativeLayout>
