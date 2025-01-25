@@ -1,6 +1,6 @@
 plugins {
-    alias(libs.plugins.android.application)
-    id("com.google.gms.google-services")
+    alias(libs.plugins.android.application) // Use alias for AGP
+    id("com.google.gms.google-services") // Firebase plugin for Google services
 }
 
 android {
@@ -26,6 +26,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -33,16 +34,23 @@ android {
 }
 
 dependencies {
-
+    // AndroidX and UI libraries
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
-    implementation ("com.android.volley:volley:1.2.1")
-    implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
     implementation(libs.constraintlayout)
+
+    // Networking and data visualization
+    implementation(libs.volley) // Use version catalog for Volley
+    implementation(libs.mpandroidchart) // Use version catalog for MPAndroidChart
+
+    // Testing libraries
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
+
+    // Firebase dependencies using BOM
+    implementation(platform(libs.firebase.bom)) // Use version catalog reference for Firebase BOM
     implementation("com.google.firebase:firebase-analytics")
+    implementation(libs.firebase.auth)
 }
