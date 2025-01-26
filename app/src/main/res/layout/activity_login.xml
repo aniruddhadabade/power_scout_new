@@ -159,7 +159,7 @@
                     android:textSize="14sp"
                     android:textStyle="bold" />
             </LinearLayout>
-
+<!-- Social Buttons-->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="50dp"
