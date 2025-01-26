@@ -44,7 +44,7 @@
         app:layout_constraintVertical_bias="1.0">
 
         <TextView
-            android:id="@+id/textView4"
+            android:id="@+id/textViewEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
@@ -54,7 +54,7 @@
             android:textStyle="bold" />
 
         <EditText
-            android:id="@+id/editTextPersonName"
+            android:id="@+id/editTextUserName"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_marginTop="12dp"

@@ -19,13 +19,22 @@ public class MainActivity extends AppCompatActivity {
 
         // Find the Log In button by its ID
         Button loginButton = findViewById(R.id.loginbutton);
-
+        Button signinbutton = findViewById(R.id.signinbutton);
         // Set an onClickListener for the button
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Redirect to LoginActivity
                 Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        signinbutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Redirect to RegisterActivity
+                Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
                 startActivity(intent);
             }
         });
