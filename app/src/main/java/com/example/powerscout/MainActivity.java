@@ -1,41 +1,41 @@
 package com.example.powerscout;
 
+import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
 public class MainActivity extends AppCompatActivity {
+
+    private Button loginButton;
+    private Button signUpButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Find the Log In button by its ID
-        Button loginButton = findViewById(R.id.loginbutton);
-        Button signinbutton = findViewById(R.id.signinbutton);
-        // Set an onClickListener for the button
+        // Find view references
+        loginButton = findViewById(R.id.loginbutton);
+        signUpButton = findViewById(R.id.signinbutton);
+
+        // Set click listeners for buttons
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                // Redirect to LoginActivity
-                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                startActivity(intent);
+            public void onClick(View v) {
+                // Handle login button click
+                Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
+                startActivity(loginIntent);
             }
         });
 
-        signinbutton.setOnClickListener(new View.OnClickListener() {
+        signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                // Redirect to RegisterActivity
-                Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
-                startActivity(intent);
+            public void onClick(View v) {
+                // Handle sign-up button click
+                Intent registerIntent = new Intent(MainActivity.this, Register1Activity.class);
+                startActivity(registerIntent);
             }
         });
     }
