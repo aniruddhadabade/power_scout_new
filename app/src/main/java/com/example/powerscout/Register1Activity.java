@@ -19,14 +19,13 @@ public class Register1Activity extends AppCompatActivity {
 
     private EditText editTextUsername, editTextEmail, editTextName, editAge;
     private FirebaseAuth mAuth;
-    private int userAge; // Declare userAge outside registerUser()
+    private int userAge;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_register);
+        setContentView(R.layout.activity_register); // Ensure correct XML file
 
-        // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
 
         editTextUsername = findViewById(R.id.textView3);
@@ -49,14 +48,8 @@ public class Register1Activity extends AppCompatActivity {
             return;
         }
 
-        if (email.isEmpty()) {
-            editTextEmail.setError("Email is required!");
-            editTextEmail.requestFocus();
-            return;
-        }
-
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            editTextEmail.setError("Please enter a valid email address!");
+        if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            editTextEmail.setError("Enter a valid email!");
             editTextEmail.requestFocus();
             return;
         }
@@ -76,12 +69,12 @@ public class Register1Activity extends AppCompatActivity {
         try {
             userAge = Integer.parseInt(ageStr.replaceAll("\\D", ""));
 
-            mAuth.createUserWithEmailAndPassword(email, "")
+            mAuth.createUserWithEmailAndPassword(email, "DefaultPassword123") // Change password logic later
                     .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
-                                // User registration successful, proceed to Register2Activity
+                                // Proceed to Register2Activity with user data
                                 Intent intent = new Intent(Register1Activity.this, Register2Activity.class);
                                 intent.putExtra("username", username);
                                 intent.putExtra("email", email);
@@ -90,13 +83,12 @@ public class Register1Activity extends AppCompatActivity {
                                 startActivity(intent);
                                 finish();
                             } else {
-                                // Handle registration failure
-                                Toast.makeText(Register1Activity.this, "Registration failed! Please try again.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(Register1Activity.this, "Registration failed! Try again.", Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
         } catch (NumberFormatException e) {
-            editAge.setError("Invalid age format. Please enter a valid number.");
+            editAge.setError("Enter a valid age.");
             editAge.requestFocus();
         }
     }

@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -19,6 +20,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class LoginActivity extends AppCompatActivity {
 
     private EditText editTextEmail, editTextPassword;
+    private TextView recoverPasswordText;
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -32,8 +34,21 @@ public class LoginActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        editTextEmail = (EditText) findViewById(R.id.editTextUserName);
-        editTextPassword = (EditText) findViewById(R.id.editTextPassword);
+        editTextEmail = findViewById(R.id.editTextUserName);
+        editTextPassword = findViewById(R.id.editTextPassword);
+
+        // Find the TextView for password recovery
+        recoverPasswordText = findViewById(R.id.textView6);
+
+        // Set onClickListener for the recover password TextView
+        recoverPasswordText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Navigate to ResetPasswordActivity
+                Intent resetPasswordIntent = new Intent(LoginActivity.this, ResetPasswordActivity.class);
+                startActivity(resetPasswordIntent);
+            }
+        });
 
         findViewById(R.id.button2).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -85,13 +100,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void checkUserInFirestore(String email) {
-
-        // ...
-
-        // If user exists, navigate to your main activity
-        // If user doesn't exist, you can handle it here (e.g., show a message or navigate to a profile setup activity)
-
-        // Example navigation to another activity (replace with your actual activity)
+        // Assuming the user exists and moving to the MainActivity
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(intent);
         finish();

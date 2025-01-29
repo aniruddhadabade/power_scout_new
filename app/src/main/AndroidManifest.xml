@@ -44,6 +44,9 @@
             android:name=".Register2Activity"
             android:exported="true" />
 
+        <activity android:name=".ResetPasswordActivity"
+            android:exported="true" />
+
     </application>
 
 </manifest>

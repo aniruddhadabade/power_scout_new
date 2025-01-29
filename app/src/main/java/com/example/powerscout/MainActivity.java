@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent registerIntent = new Intent(MainActivity.this, Register1Activity.class);
                 startActivity(registerIntent);
             }
+
         });
     }
 }
