@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">PowerScout</string>
     <string name="title_activity_splash">SplashActivity</string>
+    <string name="default_web_client_id">403488565329-3ntbedqgir4npi0kgqmbumt4i758pvd9.apps.googleusercontent.com</string>
+
 </resources>
