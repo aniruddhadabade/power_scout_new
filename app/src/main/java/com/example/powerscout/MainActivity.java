@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Handle sign-up button click
-                Intent registerIntent = new Intent(MainActivity.this, Register1Activity.class);
+                Intent registerIntent = new Intent(MainActivity.this, HomeActivity.class);
                 startActivity(registerIntent);
             }
 

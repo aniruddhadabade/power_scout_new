@@ -123,31 +123,25 @@
                 android:background="#707070" />
         </LinearLayout>
 
-        <!-- Social Buttons-->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:padding="16dp">
-
             <!-- Google Button -->
-            <com.google.android.gms.common.SignInButton
-                android:id="@+id/google_sign_in_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Sign in with Google"
-                android:layout_marginTop="8dp" />
-
-        </LinearLayout>
+        <com.google.android.gms.common.SignInButton
+            android:id="@+id/google_sign_in_button"
+            android:background="@drawable/button_background"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="16dp"
+            android:text="Login"
+            android:textColor="#ffffff"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:backgroundTint="@color/blue"/>
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/button2"
             style="@android:style/Widget.Button"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="18dp"
             android:background="@drawable/button_background"
             android:text="Login"
             android:textColor="#ffffff"

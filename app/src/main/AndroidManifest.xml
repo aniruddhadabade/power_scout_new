@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.powerscout">
-
     <!-- Permission to access the internet -->
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -16,40 +15,41 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PowerScout"
         tools:targetApi="31">
-
-        <!-- SplashActivity is the launcher activity -->
+        <activity
+            android:name=".NavigationContent"
+            android:exported="false" />
+        <activity
+            android:name=".DrawerHeader"
+            android:exported="false" />
+        <activity
+            android:name=".HomeActivity"
+            android:exported="false" /> <!-- SplashActivity is the launcher activity -->
         <activity
             android:name=".SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.Design.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- MainActivity should be the first screen after SplashActivity -->
+        </activity> <!-- MainActivity should be the first screen after SplashActivity -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.PowerScout" />
-
-        <!-- Other activities -->
+            android:theme="@style/Theme.PowerScout" /> <!-- Other activities -->
         <activity
             android:name=".LoginActivity"
             android:exported="true" />
-
         <activity
             android:name=".Register1Activity"
             android:exported="true" />
-
         <activity
             android:name=".Register2Activity"
             android:exported="true" />
-
-        <activity android:name=".ResetPasswordActivity"
+        <activity
+            android:name=".ResetPasswordActivity"
             android:exported="true" />
-
     </application>
 
 </manifest>
