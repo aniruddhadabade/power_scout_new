@@ -16,6 +16,15 @@
         android:theme="@style/Theme.PowerScout"
         tools:targetApi="31">
         <activity
+            android:name=".activity_update_info2"
+            android:exported="false" />
+        <activity
+            android:name=".activity_update_info1"
+            android:exported="false" />
+        <activity
+            android:name=".activity_update_info3"
+            android:exported="false" />
+        <activity
             android:name=".NavigationContent"
             android:exported="false" />
         <activity

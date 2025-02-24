@@ -1,5 +1,6 @@
 package com.example.powerscout;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -62,6 +63,8 @@ public class HomeActivity extends AppCompatActivity {
                 int itemId = item.getItemId();
                 if(itemId == R.id.navAccount){
                     Toast.makeText(HomeActivity.this, "Account Clicked", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(HomeActivity.this, activity_update_info1.class);
+                    startActivity(intent);
                 }
 
                 if(itemId == R.id.navDasboard){

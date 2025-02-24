@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="Base.Theme.PowerScout" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Make the app fullscreen -->
-        <item name="android:windowFullscreen">true</item>
-        <item name="android:windowTranslucentStatus">true</item>
-
-        <!-- Transparent status bar -->
+    <style name="Theme.PowerScout" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Fullscreen with Transparent Status Bar -->
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:colorPrimary">@android:color/transparent</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowLightStatusBar">true</item> <!-- Light icons if background is dark -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
 
-        <!-- Remove navigation bar shadow -->
-        <item name="android:windowActionBarOverlay">true</item>
-        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <!-- Fix for fullscreen issues -->
+        <item name="android:fitsSystemWindows">false</item>
+
+        <!-- Ensure navigation bar transparency -->
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+
+        <!-- Primary theme colors -->
+        <item name="colorPrimary">@android:color/transparent</item>
+        <item name="colorPrimaryDark">@android:color/transparent</item>
     </style>
 </resources>
