@@ -42,6 +42,7 @@ dependencies {
     implementation ("com.google.android.material:material:1.6.0")
     implementation ("com.google.android.gms:play-services-auth:20.7.0")
     implementation(libs.constraintlayout)
+    implementation(libs.firebase.storage)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -49,6 +50,9 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-firestore:24.4.3")
     implementation("com.google.firebase:firebase-auth:22.1.1")
-    implementation("com.google.android.gms:play-services-auth:20.4.0")
+    implementation("com.google.firebase:firebase-storage:20.3.0")
+    implementation("com.github.bumptech.glide:glide:4.15.1")
+    implementation ("org.mindrot:jbcrypt:0.4")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.15.1")
 
 }

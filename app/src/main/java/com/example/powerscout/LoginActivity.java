@@ -2,6 +2,7 @@ package com.example.powerscout;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.EditText;
@@ -9,13 +10,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.common.api.ApiException; // Add this import
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.AuthCredential; // Add this import
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -96,8 +100,8 @@ public class LoginActivity extends AppCompatActivity {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        // Check if user exists in Firestore after successful login
-                        checkUserInFirestore(email);
+                        // Show success alert and then navigate to HomeActivity
+                        showLoginSuccessSnackbar();
                     } else {
                         findViewById(R.id.button2).setEnabled(true);
                         Toast.makeText(LoginActivity.this, "Login failed! Please check your credentials.", Toast.LENGTH_SHORT).show();
@@ -105,9 +109,23 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
+    private void showLoginSuccessSnackbar() {
+        Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content), "Login Successful!", Snackbar.LENGTH_SHORT);
+        snackbar.setBackgroundTint(ContextCompat.getColor(this, R.color.blue)); // Customize background color
+        snackbar.setTextColor(ContextCompat.getColor(this, R.color.white)); // Customize text color
+        snackbar.show();
+
+        // Immediately redirect to HomeActivity
+        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+
+
     private void checkUserInFirestore(String email) {
         // Assuming the user exists and moving to MainActivity
-        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
     }
