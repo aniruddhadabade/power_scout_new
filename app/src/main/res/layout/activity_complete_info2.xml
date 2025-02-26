@@ -87,10 +87,10 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="20dp"
-                            android:text="Edit Profile"
+                            android:text="Complete Profile"
                             android:textAlignment="center"
                             android:textColor="@color/blue"
-                            android:textSize="36sp"
+                            android:textSize="30sp"
                             android:textStyle="bold" />
 
                         <EditText

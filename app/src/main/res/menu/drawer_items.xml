@@ -10,19 +10,25 @@
             android:title="Account" />
 
         <item
+            android:icon="@drawable/baseline_edit_square_24"
+            android:id="@+id/navCompleteInfo"
+            android:title="Complete Information" />
+
+        <item
             android:icon="@drawable/bar_chart"
             android:id="@+id/navDasboard"
             android:title="Dashboard" />
 
-        <item
-            android:icon="@drawable/history_icon"
-            android:id="@+id/navHistory"
-            android:title="Reports and History" />
+
     </group>
 
     <group
         android:id="@+id/group2"
         >
+        <item
+            android:icon="@drawable/history_icon"
+            android:id="@+id/navHistory"
+            android:title="Reports and History" />
         <item
             android:icon="@drawable/energy_savings"
             android:id="@+id/navTips"

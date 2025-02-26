@@ -18,7 +18,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
 
-public class activity_update_info2 extends AppCompatActivity {
+public class activity_update_info2 extends BaseActivity {
 
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
@@ -35,23 +35,7 @@ public class activity_update_info2 extends AppCompatActivity {
             return insets;
         });
 
-        drawerLayout = findViewById(R.id.drawerLayout);
-        navigationView = findViewById(R.id.navigationView);
-        buttonDrawerToggle = findViewById(R.id.buttonDrawerToggle); // Ensure this is in your XML
-
-        // Handle drawer button click
-        buttonDrawerToggle.setOnClickListener(v -> drawerLayout.open());
-
-        // Handle navigation item clicks
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                int itemId = item.getItemId();
-                Toast.makeText(activity_update_info2.this, item.getTitle() + " Clicked", Toast.LENGTH_SHORT).show();
-                drawerLayout.close();
-                return true;
-            }
-        });
+        setupNavigationDrawer();
 
         Button nextButton = findViewById(R.id.saveButton);
 
