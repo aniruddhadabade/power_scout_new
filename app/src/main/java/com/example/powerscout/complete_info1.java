@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.Button;
-import android.widget.ImageButton;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -16,8 +16,20 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class complete_info1 extends BaseActivity {
+
+    private EditText editFirstName, editLastName, editPhone;
+    private Button saveButton;
+    private FirebaseFirestore db;
+    private FirebaseAuth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,13 +42,54 @@ public class complete_info1 extends BaseActivity {
             return insets;
         });
 
+        // Initialize Firebase
+        auth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+
         setupNavigationDrawer();
 
+        // Initialize UI elements
+        editFirstName = findViewById(R.id.editFirstName);
+        editLastName = findViewById(R.id.editLastName);
+        editPhone = findViewById(R.id.editPhone);
+        saveButton = findViewById(R.id.saveButton);
+
         // Handle Next button click
-        Button nextButton = findViewById(R.id.saveButton);
-        nextButton.setOnClickListener(v -> {
-            Intent intent = new Intent(complete_info1.this, complete_info2.class);
-            startActivity(intent);
-        });
+        saveButton.setOnClickListener(v -> saveUserData());
+    }
+
+    private void saveUserData() {
+        FirebaseUser user = auth.getCurrentUser();
+        if (user != null) {
+            String userId = user.getUid();
+            String firstName = editFirstName.getText().toString().trim();
+            String lastName = editLastName.getText().toString().trim();
+            String phone = editPhone.getText().toString().trim();
+
+            if (firstName.isEmpty() || lastName.isEmpty() || phone.isEmpty()) {
+                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Reference to the logged-in user's document
+            DocumentReference userRef = db.collection("users").document(userId);
+
+            // Store data without deleting previous fields
+            Map<String, Object> userData = new HashMap<>();
+            userData.put("firstName", firstName);
+            userData.put("lastName", lastName);
+            userData.put("phone", phone);
+
+            userRef.update(userData)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(complete_info1.this, "Profile updated successfully", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(complete_info1.this, complete_info2.class));
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(complete_info1.this, "Failed to update profile: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+        } else {
+            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show();
+        }
     }
 }

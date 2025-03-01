@@ -1,24 +1,65 @@
 package com.example.powerscout;
 
 import android.os.Bundle;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class DrawerHeader extends AppCompatActivity {
+
+    private TextView textUserName, textUserEmail;
+    private ImageView userImage;
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_drawer_header);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+
+        // Initialize Firebase Auth and Firestore
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+
+        // Initialize UI elements
+        textUserName = findViewById(R.id.textUserName);
+        textUserEmail = findViewById(R.id.textUserEmail);
+        userImage = findViewById(R.id.userImage);
+
+        // Fetch user details from Firestore
+        loadUserInfo();
+    }
+
+    private void loadUserInfo() {
+        FirebaseUser user = mAuth.getCurrentUser();
+
+        if (user != null) {
+            String uid = user.getUid();
+
+            // Reference Firestore document
+            DocumentReference userRef = db.collection("users").document(uid);
+            userRef.get().addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    String username = documentSnapshot.getString("username");
+                    String email = documentSnapshot.getString("email");
+
+                    // Update UI
+                    textUserName.setText(username != null ? username : "User Name");
+                    textUserEmail.setText(email != null ? email : "User Email");
+
+                } else {
+                    Toast.makeText(this, "User data not found.", Toast.LENGTH_SHORT).show();
+                }
+            }).addOnFailureListener(e -> {
+                Toast.makeText(this, "Failed to load user data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            });
+        }
     }
 }

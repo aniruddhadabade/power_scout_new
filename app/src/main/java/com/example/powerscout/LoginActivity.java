@@ -116,7 +116,7 @@ public class LoginActivity extends AppCompatActivity {
         snackbar.show();
 
         // Immediately redirect to HomeActivity
-        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+        Intent intent = new Intent(LoginActivity.this, complete_info1.class);
         startActivity(intent);
         finish();
     }

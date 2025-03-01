@@ -26,6 +26,15 @@
             android:name=".complete_info1"
             android:exported="false" />
         <activity
+            android:name=".complete_info3"
+            android:exported="false" />
+        <activity
+            android:name=".complete_info2"
+            android:exported="false" />
+        <activity
+            android:name=".complete_info1"
+            android:exported="false" />
+        <activity
             android:name=".activity_update_info2"
             android:exported="false" />
         <activity

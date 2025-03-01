@@ -94,7 +94,7 @@
                             android:textStyle="bold" />
 
                         <EditText
-                            android:id="@+id/editEmail"
+                            android:id="@+id/editAge"
                             android:layout_width="match_parent"
                             android:layout_height="50dp"
                             android:layout_marginTop="5dp"
@@ -120,14 +120,14 @@
                             android:textColor="@color/grey" />
 
                         <EditText
-                            android:id="@+id/editPassword"
+                            android:id="@+id/editNoDevice"
                             android:layout_width="match_parent"
                             android:layout_height="50dp"
                             android:layout_marginTop="20dp"
                             android:background="@drawable/lavender_border"
                             android:gravity="center_vertical"
                             android:drawableLeft="@drawable/ic_baseline_lightbulb"
-                            android:hint="No. Of Device"
+                            android:hint="No. Of Devices"
                             android:inputType="number"
                             android:paddingStart="16dp"
                             android:textColor="@color/black" />

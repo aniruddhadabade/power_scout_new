@@ -94,7 +94,7 @@
                             android:textStyle="bold" />
 
                         <EditText
-                            android:id="@+id/editEmail"
+                            android:id="@+id/editFirstName"
                             android:layout_width="match_parent"
                             android:layout_height="50dp"
                             android:layout_marginTop="10dp"
@@ -107,7 +107,7 @@
                             android:textColor="@color/grey" />
 
                         <EditText
-                            android:id="@+id/editUsername"
+                            android:id="@+id/editLastName"
                             android:layout_width="match_parent"
                             android:layout_height="50dp"
                             android:layout_marginTop="15dp"
@@ -120,7 +120,7 @@
                             android:textColor="@color/grey" />
 
                         <EditText
-                            android:id="@+id/editPassword"
+                            android:id="@+id/editPhone"
                             android:layout_width="match_parent"
                             android:layout_height="50dp"
                             android:layout_marginTop="15dp"
