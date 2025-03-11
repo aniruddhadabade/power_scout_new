@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardElevation="6dp"
+    app:cardCornerRadius="12dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        android:background="@color/light_blue2">
+
+        <!-- Tip Image (Left Side) -->
+        <ImageView
+            android:id="@+id/tipImage"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/sample_image"
+            android:layout_marginEnd="12dp" />
+
+        <!-- Tip Content (Right Side) -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- Tip Title -->
+            <TextView
+                android:id="@+id/tipTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Energy Saving Tip"
+                android:textSize="16sp"
+                android:drawablePadding="6dp"
+                android:fontFamily="@font/roboto_medium"/>
+
+            <!-- Tip Description -->
+            <TextView
+                android:id="@+id/tipDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Turn off lights when not in use to save energy."
+                android:textSize="14sp"
+                android:textColor="@color/gray"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:paddingTop="4dp"/>
+
+            <!-- Read More (Clickable Article Link) -->
+            <TextView
+                android:id="@+id/btnReadMore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Read More"
+                android:textSize="14sp"
+                android:textColor="@color/light_blue"
+                android:paddingTop="4dp"
+                android:visibility="gone"
+                android:clickable="true"
+                android:focusable="true"/>
+
+            <!-- Author Name -->
+            <TextView
+                android:id="@+id/tipAuthor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="By Author Name"
+                android:textSize="12sp"
+                android:textColor="@color/gray"
+                android:paddingTop="2dp"/>
+
+            <!-- Tip Thanks Count -->
+            <TextView
+                android:id="@+id/tipThanks"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Thanks"
+                android:textSize="12sp"
+                android:textColor="@color/gray"
+                android:paddingTop="2dp"/>
+
+            <!-- Action Buttons -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="10dp"
+                android:gravity="start">
+
+                <ImageButton
+                    android:id="@+id/btnLike"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@drawable/ic_like"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:layout_marginEnd="8dp" />
+
+                <ImageButton
+                    android:id="@+id/btnSave"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@drawable/ic_save"
+                    app:tint="@color/black"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:layout_marginEnd="8dp"/>
+
+                <ImageButton
+                    android:id="@+id/btnShare"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@drawable/ic_share"
+                    app:tint="@color/black"
+                    android:background="?attr/selectableItemBackgroundBorderless"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
+

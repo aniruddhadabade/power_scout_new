@@ -58,6 +58,10 @@
             android:icon="@drawable/share_icon"
             android:id="@+id/navShare"
             android:title="Share" />
+        <item
+            android:icon="@drawable/baseline_logout_24"
+            android:id="@+id/logout"
+            android:title="Logout" />
     </group>
 
 </menu>

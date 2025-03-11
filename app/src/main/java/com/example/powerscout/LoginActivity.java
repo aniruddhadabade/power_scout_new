@@ -100,13 +100,15 @@ public class LoginActivity extends AppCompatActivity {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        // Show success alert and then navigate to HomeActivity
                         showLoginSuccessSnackbar();
                     } else {
                         findViewById(R.id.button2).setEnabled(true);
-                        Toast.makeText(LoginActivity.this, "Login failed! Please check your credentials.", Toast.LENGTH_SHORT).show();
+                        Exception exception = task.getException();
+                        Toast.makeText(LoginActivity.this, "Login failed: " + exception.getMessage(), Toast.LENGTH_LONG).show();
                     }
+                    
                 });
+
     }
 
     private void showLoginSuccessSnackbar() {
@@ -125,7 +127,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void checkUserInFirestore(String email) {
         // Assuming the user exists and moving to MainActivity
-        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        Intent intent = new Intent(LoginActivity.this, activity_update_info1.class);
         startActivity(intent);
         finish();
     }

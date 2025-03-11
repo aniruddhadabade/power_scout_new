@@ -6,7 +6,7 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
+import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -47,6 +47,7 @@ public class complete_info1 extends BaseActivity {
         db = FirebaseFirestore.getInstance();
 
         setupNavigationDrawer();
+        fetchUserName();
 
         // Initialize UI elements
         editFirstName = findViewById(R.id.editFirstName);
@@ -92,4 +93,31 @@ public class complete_info1 extends BaseActivity {
             Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show();
         }
     }
+
+    private void fetchUserName() {
+        FirebaseUser user = auth.getCurrentUser();
+        if (user != null) {
+            String userId = user.getUid();
+            DocumentReference userRef = db.collection("users").document(userId);
+
+            userRef.get().addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    String username = documentSnapshot.getString("username");
+
+                    if (username != null) {
+                        updateUserName(username);
+                    }
+                }
+            }).addOnFailureListener(e ->
+                    Toast.makeText(complete_info1.this, "Failed to fetch username", Toast.LENGTH_SHORT).show()
+            );
+        }
+    }
+
+    // Update the TextView with the user's name
+    private void updateUserName(String username) {
+        TextView userNameTextView = findViewById(R.id.tvUserName);
+        userNameTextView.setText("Hi, " + username);
+    }
+
 }

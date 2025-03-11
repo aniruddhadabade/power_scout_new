@@ -24,11 +24,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Register1Activity extends AppCompatActivity {
-
     private EditText editTextEmail, editTextPassword, editTextConfirmPassword, editTextUsername;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +41,7 @@ public class Register1Activity extends AppCompatActivity {
         editTextEmail = findViewById(R.id.emailEditText);
         editTextPassword = findViewById(R.id.passwordEditText);
         editTextConfirmPassword = findViewById(R.id.confirmPasswordEditText);
-        editTextUsername = findViewById(R.id.editUsername); // Fixed initialization
+        editTextUsername = findViewById(R.id.editUsername);
 
         findViewById(R.id.registerButton).setOnClickListener(v -> registerUser());
     }
@@ -85,7 +83,14 @@ public class Register1Activity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
                         if (user != null) {
-                            saveUserToFirestore(user.getUid(), username, email, password);
+                            try {
+                                // Encrypt password before saving
+                                String encryptedPassword = AESEncryption.encrypt(password);
+                                saveUserToFirestore(user.getUid(), username, email, encryptedPassword);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                Toast.makeText(Register1Activity.this, "Encryption error!", Toast.LENGTH_SHORT).show();
+                            }
                         }
                     } else {
                         Toast.makeText(Register1Activity.this,
@@ -95,7 +100,7 @@ public class Register1Activity extends AppCompatActivity {
                 });
     }
 
-    private void saveUserToFirestore(String uid, String username, String email, String password) {
+    private void saveUserToFirestore(String uid, String username, String email, String encryptedPassword) {
         final DocumentReference counterRef = db.collection("counters").document("user_counter");
 
         db.runTransaction(transaction -> {
@@ -117,7 +122,7 @@ public class Register1Activity extends AppCompatActivity {
             userData.put("username", username);
             userData.put("email", email);
             userData.put("uid", uid);
-            userData.put("password", password);
+            userData.put("password", encryptedPassword);  // 🔹 Now encrypted
             userData.put("created_at", System.currentTimeMillis());
 
             db.collection("users").document(uid)
@@ -136,5 +141,4 @@ public class Register1Activity extends AppCompatActivity {
             Log.e("Firestore", "Transaction failed", e);
         });
     }
-
 }

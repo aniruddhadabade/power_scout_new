@@ -2,5 +2,50 @@
     <string name="app_name">PowerScout</string>
     <string name="title_activity_splash">SplashActivity</string>
     <string name="default_web_client_id">403488565329-3ntbedqgir4npi0kgqmbumt4i758pvd9.apps.googleusercontent.com</string>
+    <string name="terms_and_conditions">
+    Terms and Conditions for Power Scout App\n\n
+    Welcome to Power Scout! These Terms and Conditions govern your use of the Power Scout mobile application (the "App").
+    By downloading, accessing, or using the App, you agree to comply with these Terms. If you do not agree, please do not use the App.\n\n
+
+    1. Use of the App\n
+    The App is designed to help users track and optimize their energy consumption.\n
+    You must be at least 13 years old to use the App.\n
+    You agree to use the App for lawful purposes only.\n
+    Unauthorized modification, distribution, or reverse-engineering of the App is prohibited.\n\n
+
+    2. Data Collection and Privacy\n
+    The App may collect energy usage data, device information, and user preferences to improve the service.\n
+    Any personal data collected is subject to our Privacy Policy.\n
+    We do not sell, trade, or misuse user data.\n\n
+
+    3. Accuracy of Information\n
+    The energy tracking insights provided by the App are based on available data and estimates.
+    They should not be considered as absolute values.\n
+    We are not responsible for any financial or energy-related decisions made based on the App’s data.\n\n
+
+    4. Third-Party Services\n
+    The App may include links or integration with third-party services or APIs.\n
+    We are not responsible for the content or security of third-party services.\n\n
+
+    5. Limitation of Liability\n
+    The App is provided "as is" without warranties of any kind.\n
+    We do not guarantee that the App will be error-free or continuously available.\n
+    We are not responsible for any direct, indirect, or incidental damages resulting from the use of the App.\n\n
+
+    6. Changes to the Terms\n
+    We reserve the right to update these Terms at any time.\n
+    Continued use of the App after updates constitutes acceptance of the revised Terms.\n\n
+
+    7. Termination\n
+    We may suspend or terminate your access to the App if you violate these Terms.\n
+    You may stop using the App at any time.\n\n
+
+    8. Contact Information\n
+    For any questions or concerns regarding these Terms, contact us at [Your Email/Support Page].\n\n
+
+    By using the Power Scout App, you agree to these Terms and Conditions.
+</string>
+
+
 
 </resources>

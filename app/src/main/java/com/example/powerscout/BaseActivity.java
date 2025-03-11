@@ -67,14 +67,22 @@ public class BaseActivity extends AppCompatActivity {
                     Toast.makeText(BaseActivity.this, "History Clicked", Toast.LENGTH_SHORT).show();
                 } else if (itemId == R.id.navContact) {
                     Toast.makeText(BaseActivity.this, "Contact Clicked", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(BaseActivity.this, ContactUsActivity.class));
                 } else if (itemId == R.id.navFeedback) {
                     Toast.makeText(BaseActivity.this, "Feedback Clicked", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(BaseActivity.this, FeedbackActivity.class));
                 } else if (itemId == R.id.navShare) {
                     Toast.makeText(BaseActivity.this, "Share Clicked", Toast.LENGTH_SHORT).show();
                 } else if (itemId == R.id.navTerms) {
                     Toast.makeText(BaseActivity.this, "Terms Clicked", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(BaseActivity.this, TermsConditionActivity.class));
                 } else if (itemId == R.id.navTips) {
                     Toast.makeText(BaseActivity.this, "Tips Clicked", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(BaseActivity.this, EnergySavingActivity.class));
+                }
+                else if (itemId == R.id.logout) {
+                    Toast.makeText(BaseActivity.this, "Logout Clicked", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(BaseActivity.this, MainActivity.class));
                 }
 
                 drawerLayout.close();
