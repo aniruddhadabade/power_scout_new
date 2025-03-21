@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawerLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:openDrawer="start"
+    tools:context=".Dashboard">
+
+    <!-- Main Content (Dashboard) -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:background="@android:color/white">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <include
+                        layout="@layout/activity_navigation_content"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Electricity Usage"
+                        android:layout_marginTop="20dp"
+                        android:textSize="25sp"
+                        android:textColor="#000000"
+                        android:layout_marginStart="25dp"/>
+                </LinearLayout>
+
+
+                <!-- Date -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Aug 12"
+                    android:textSize="16sp"
+                    android:textColor="#000000"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="16dp"/>
+
+                <!-- Today and This Month Usage -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Today"
+                            android:textSize="16sp"
+                            android:textColor="#000000"/>
+                        <TextView
+                            android:id="@+id/todayUsage"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="14.1 kWh"
+                            android:textSize="24sp"
+                            android:textColor="#1E88E5"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="This month"
+                            android:textSize="16sp"
+                            android:textColor="#000000"/>
+                        <TextView
+                            android:id="@+id/monthUsage"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="166.8 kWh"
+                            android:textSize="24sp"
+                            android:textColor="#1E88E5"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Pie Chart -->
+                <com.github.mikephil.charting.charts.PieChart
+                    android:id="@+id/pieChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:layout_marginBottom="16dp"/>
+
+                <!-- CardView with Month, Year, Total Tabs and Bar Chart -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="4dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp"
+                        android:background="@android:color/white">
+
+                        <!-- Month | Year | Total -->
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Month"
+                                android:textSize="16sp"
+                                android:padding="8dp"
+                                android:textColor="#1E88E5"
+                                android:textStyle="bold"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Year"
+                                android:textSize="16sp"
+                                android:padding="8dp"
+                                android:textColor="#757575"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Total"
+                                android:textSize="16sp"
+                                android:padding="8dp"
+                                android:textColor="#757575"/>
+                        </LinearLayout>
+
+                        <!-- Bar Chart -->
+                        <com.github.mikephil.charting.charts.BarChart
+                            android:id="@+id/barChart"
+                            android:layout_width="match_parent"
+                            android:layout_height="220dp"
+                            android:background="@android:color/transparent"/>
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </FrameLayout>
+
+    <!-- Navigation Drawer -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navigationView"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:itemIconPadding="30dp"
+        app:headerLayout="@layout/activity_drawer_header"
+        app:menu="@menu/drawer_items"/>
+
+</androidx.drawerlayout.widget.DrawerLayout>

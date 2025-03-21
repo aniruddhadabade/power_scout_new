@@ -42,6 +42,8 @@ public class complete_info2 extends BaseActivity {
             return insets;
         });
 
+        setupNavigationDrawer();
+
         // Initialize Firebase
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
