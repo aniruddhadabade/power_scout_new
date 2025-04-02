@@ -2,8 +2,8 @@ package com.example.powerscout;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.widget.CompoundButton;
-import android.widget.Switch;
+import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,14 +20,37 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Locale;
+import java.util.Map;
+
 
 
 public class Dashboard extends BaseActivity {
-
+    private FirebaseFirestore firestore;
+    private FirebaseAuth firebaseAuth;
+    private FirebaseUser currentUser;
     private PieChart pieChart;
     private BarChart barChart;
+    private DatabaseReference databaseRef;
+    private TextView todayUsageTextView;
+    private TextView monthUsageTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,25 +58,112 @@ public class Dashboard extends BaseActivity {
         setContentView(R.layout.activity_dashboard);
 
         setupNavigationDrawer();
+        firebaseAuth = FirebaseAuth.getInstance();
+        currentUser = firebaseAuth.getCurrentUser();
+        firestore = FirebaseFirestore.getInstance();
+        databaseRef = FirebaseDatabase.getInstance().getReference();
 
-        // Initialize charts
+        databaseRef = FirebaseDatabase.getInstance().getReference("sensor");
+        todayUsageTextView = findViewById(R.id.todayUsage);
+        monthUsageTextView = findViewById(R.id.monthUsage);
         pieChart = findViewById(R.id.pieChart);
         barChart = findViewById(R.id.barChart);
 
-        // Set up the Pie Chart with dummy data
-        setupPieChart();
-
-        // Set up the Bar Chart with dummy data
-        setupBarChart();
+        fetchDataAndUpdateCharts();
+        TextView dateTextView = findViewById(R.id.dateTextView);
+        String currentDate = new SimpleDateFormat("MMM dd", Locale.getDefault()).format(new Date());
+        dateTextView.setText(currentDate);
     }
 
-    private void setupPieChart() {
+    private void fetchDataAndUpdateCharts() {
+        databaseRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    // Fetch voltage and current
+                    double voltage = dataSnapshot.child("voltage").getValue(Double.class);
+                    double current = dataSnapshot.child("current").getValue(Double.class);
+
+
+                    double power = voltage + current ; // Power in watts
+                    double energy = power * 10;
+
+                    todayUsageTextView.setText(String.format(Locale.getDefault(), "%.1f kWh", energy));
+                    monthUsageTextView.setText(String.format(Locale.getDefault(), "%.1f kWh", energy));
+                    updatePieChart(energy);
+
+                    updateBarChart(energy);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e("Dashboard", "Firebase Database Error: " + databaseError.getMessage());
+            }
+        });
+//        fetchDeviceDataAndUpdatePieChart();
+    }
+
+//    private void fetchDeviceDataAndUpdatePieChart() {
+//        if (currentUser != null) {
+//            String userId = currentUser.getUid();
+//            DocumentReference userRef = firestore.collection("users").document(userId);
+//
+//            userRef.get().addOnCompleteListener(task -> {
+//                if (task.isSuccessful()) {
+//                    DocumentSnapshot document = task.getResult();
+//                    if (document.exists()) {
+//                        // Fetch device names from Firestore
+//                        Map<String, Object> devices = (Map<String, Object>) document.get("device_name");
+//                        if (devices != null) {
+//                            // Fetch consumption data from Realtime Database
+//                            databaseRef.child("sensor").addListenerForSingleValueEvent(new ValueEventListener() {
+//                                @Override
+//                                public void onDataChange(DataSnapshot dataSnapshot) {
+//                                    if (dataSnapshot.exists()) {
+//                                        ArrayList<PieEntry> entries = new ArrayList<>();
+//
+//                                        // Iterate through devices and add consumption data to PieChart
+//                                        for (Map.Entry<String, Object> device : devices.entrySet()) {
+//                                            String deviceId = device.getKey();
+//                                            String deviceName = (String) device.getValue();
+//                                            Double consumption = dataSnapshot.child(deviceId).getValue(Double.class);
+//
+//                                            if (consumption != null) {
+//                                                entries.add(new PieEntry(consumption.floatValue(), deviceName));
+//                                            }
+//                                        }
+//
+//                                        // Update PieChart with fetched data
+//                                        Object PieEntry;
+//                                        updatePieChart(ArrayList<PieEntry> entries);
+//                                    }
+//                                }
+//
+//                                @Override
+//                                public void onCancelled(DatabaseError databaseError) {
+//                                    Log.e("Dashboard", "Firebase Database Error: " + databaseError.getMessage());
+//                                }
+//                            });
+//                        }
+//                    } else {
+//                        Log.e("Dashboard", "Firestore Document does not exist");
+//                    }
+//                } else {
+//                    Log.e("Dashboard", "Firestore Error: " + task.getException().getMessage());
+//                }
+//            });
+//        }
+//    }
+
+
+    private void updatePieChart(double energy) {
         // Dummy data for the pie chart (device usage)
         ArrayList<PieEntry> entries = new ArrayList<>();
-        entries.add(new PieEntry(34f, "AC"));  // 34% for Air Conditioner
+        entries.add(new PieEntry(34f, "BULB"));  // 34% for Air Conditioner
         entries.add(new PieEntry(27f, "WM"));  // 27% for Washing Machine
-        entries.add(new PieEntry(23f, "Dry")); // 23% for Dryer
-        entries.add(new PieEntry(16f, "Car")); // 16% for Car
+//        entries.add(new PieEntry(23f, "Dry")); // 23% for Dryer
+//        entries.add(new PieEntry(16f, "Car")); // 16% for Car
 
         // Create a dataset for the pie chart
         PieDataSet dataSet = new PieDataSet(entries, "");
@@ -67,7 +177,7 @@ public class Dashboard extends BaseActivity {
 
         // Customize the pie chart
         pieChart.getDescription().setEnabled(false);
-        pieChart.setCenterText("0.48\nkWh/Now");
+        pieChart.setCenterText(String.format("%.2f\nkWh/Now", energy)); // Dynamic kWh value
         pieChart.setCenterTextSize(14f);
         pieChart.setHoleRadius(50f);
         pieChart.setTransparentCircleRadius(55f);
@@ -85,18 +195,14 @@ public class Dashboard extends BaseActivity {
         pieChart.invalidate(); // Refresh the chart
     }
 
-
-
-    private void setupBarChart() {
-        BarChart barChart = findViewById(R.id.barChart);
-
+    private void updateBarChart(double energy) {
         // Dummy data for the bar chart (monthly usage)
         ArrayList<BarEntry> entries = new ArrayList<>();
         entries.add(new BarEntry(4, 6f));
         entries.add(new BarEntry(5, 7f));
         entries.add(new BarEntry(6, 8f));
         entries.add(new BarEntry(7, 9f));
-        entries.add(new BarEntry(8, 10f));
+        entries.add(new BarEntry(8, (float) energy)); // Dynamic energy value
         entries.add(new BarEntry(9, 9f));
         entries.add(new BarEntry(10, 10f));
         entries.add(new BarEntry(11, 11f));
@@ -132,15 +238,13 @@ public class Dashboard extends BaseActivity {
         leftAxis.setTextColor(Color.BLACK);
         leftAxis.setGridColor(Color.parseColor("#E0E0E0")); // Soft gray gridlines
 
-        barChart.getAxisRight().setEnabled(false); // Hide right Y-axis
+        barChart.getAxisRight().setEnabled(false);
         barChart.setDragEnabled(true);
         barChart.setScaleXEnabled(true);
         barChart.setVisibleXRangeMaximum(6);
 
-        // Disable legend for clean UI
         barChart.getLegend().setEnabled(false);
 
-        barChart.invalidate(); // Refresh the chart
+        barChart.invalidate();
     }
-
 }

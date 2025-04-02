@@ -15,7 +15,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class DrawerHeader extends AppCompatActivity {
 
     private TextView textUserName, textUserEmail;
-    private ImageView userImage;
+//    private ImageView userImage;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
@@ -31,7 +31,7 @@ public class DrawerHeader extends AppCompatActivity {
         // Initialize UI elements
         textUserName = findViewById(R.id.textUserName);
         textUserEmail = findViewById(R.id.textUserEmail);
-        userImage = findViewById(R.id.userImage);
+
 
         // Fetch user details from Firestore
         loadUserInfo();
@@ -47,10 +47,11 @@ public class DrawerHeader extends AppCompatActivity {
             DocumentReference userRef = db.collection("users").document(uid);
             userRef.get().addOnSuccessListener(documentSnapshot -> {
                 if (documentSnapshot.exists()) {
+                    // Fetch username and email from Firestore
                     String username = documentSnapshot.getString("username");
                     String email = documentSnapshot.getString("email");
 
-                    // Update UI
+                    // Update UI with fetched data
                     textUserName.setText(username != null ? username : "User Name");
                     textUserEmail.setText(email != null ? email : "User Email");
 
@@ -60,6 +61,8 @@ public class DrawerHeader extends AppCompatActivity {
             }).addOnFailureListener(e -> {
                 Toast.makeText(this, "Failed to load user data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             });
+        } else {
+            Toast.makeText(this, "User not logged in.", Toast.LENGTH_SHORT).show();
         }
     }
 }
