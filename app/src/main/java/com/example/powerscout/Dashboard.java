@@ -7,7 +7,8 @@ import android.view.View;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+import java.text.ParseException;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
@@ -32,6 +33,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -196,55 +198,45 @@ public class Dashboard extends BaseActivity {
     }
 
     private void updateBarChart(double energy) {
-        // Dummy data for the bar chart (monthly usage)
+        // 1) Single‐entry
         ArrayList<BarEntry> entries = new ArrayList<>();
-        entries.add(new BarEntry(4, 6f));
-        entries.add(new BarEntry(5, 7f));
-        entries.add(new BarEntry(6, 8f));
-        entries.add(new BarEntry(7, 9f));
-        entries.add(new BarEntry(8, (float) energy)); // Dynamic energy value
-        entries.add(new BarEntry(9, 9f));
-        entries.add(new BarEntry(10, 10f));
-        entries.add(new BarEntry(11, 11f));
-        entries.add(new BarEntry(12, 12f));
+        entries.add(new BarEntry(0f, (float) energy));
 
-        BarDataSet dataSet = new BarDataSet(entries, "kWh");
-        dataSet.setColor(Color.parseColor("#A5D6A7")); // Light green color
+        BarDataSet dataSet = new BarDataSet(entries, "kWh Now");
+        dataSet.setColor(Color.parseColor("#A5D6A7"));
         dataSet.setValueTextSize(12f);
         dataSet.setValueTextColor(Color.BLACK);
-        dataSet.setDrawValues(false); // Hide values above bars
+        dataSet.setDrawValues(true);
 
         BarData barData = new BarData(dataSet);
-        barData.setBarWidth(0.5f); // Adjust bar width
+        barData.setBarWidth(0.5f);
 
         barChart.setData(barData);
         barChart.getDescription().setEnabled(false);
 
-        // X-Axis styling
-        XAxis xAxis = barChart.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setDrawGridLines(false);
-        xAxis.setGranularity(1f);
-        xAxis.setAxisMinimum(4f);
-        xAxis.setAxisMaximum(12f);
-        xAxis.setTextSize(12f);
-        xAxis.setTextColor(Color.BLACK);
+        // 2) X‐axis with one label "Now"
+        List<String> labels = Collections.singletonList("Now");
+        IndexAxisValueFormatter formatter = new IndexAxisValueFormatter(labels);
 
-        // Y-Axis styling
-        YAxis leftAxis = barChart.getAxisLeft();
-        leftAxis.setAxisMinimum(0f);
-        leftAxis.setAxisMaximum(16f);
-        leftAxis.setTextSize(12f);
-        leftAxis.setTextColor(Color.BLACK);
-        leftAxis.setGridColor(Color.parseColor("#E0E0E0")); // Soft gray gridlines
+        XAxis x = barChart.getXAxis();
+        x.setPosition(XAxis.XAxisPosition.BOTTOM);
+        x.setGranularity(1f);
+        x.setLabelCount(1);
+        x.setValueFormatter(formatter);
 
+        // 3) Y‐axis styling
+        YAxis left = barChart.getAxisLeft();
+        left.setAxisMinimum(0f);
+        left.setAxisMaximum((float) (energy * 1.5)); // 50% headroom
+        left.setTextSize(12f);
+        left.setGridColor(Color.parseColor("#E0E0E0"));
         barChart.getAxisRight().setEnabled(false);
-        barChart.setDragEnabled(true);
-        barChart.setScaleXEnabled(true);
-        barChart.setVisibleXRangeMaximum(6);
 
         barChart.getLegend().setEnabled(false);
-
         barChart.invalidate();
     }
+
+
+
+
 }
