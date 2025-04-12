@@ -5,6 +5,12 @@
     <!-- Permission to access the internet -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" android:permissionGroup="android.permission-group.NOTIFICATIONS"/>
+
+
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -15,6 +21,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PowerScout"
         tools:targetApi="31">
+        <activity
+            android:name=".NotificationActivity"
+            android:exported="false" />
         <activity
             android:name=".Dashboard"
             android:exported="false" />
@@ -84,6 +93,12 @@
         <activity
             android:name=".ResetPasswordActivity"
             android:exported="true" />
+        <service
+            android:name=".ConsumptionService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
     </application>
 
 </manifest>

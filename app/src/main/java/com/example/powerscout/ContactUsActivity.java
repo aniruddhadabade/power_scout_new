@@ -18,6 +18,7 @@ public class ContactUsActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_contact_us);
+        setupNavigationDrawer();
 
         // Initialize UI elements
         TextView phoneText = findViewById(R.id.tvPhone);
@@ -31,7 +32,7 @@ public class ContactUsActivity extends BaseActivity {
             return insets;
         });
 
-        setupNavigationDrawer();
+
 
         // Call phone number
         phoneText.setOnClickListener(v -> callPhone(v));

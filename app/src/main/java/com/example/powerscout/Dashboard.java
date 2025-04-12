@@ -1,12 +1,19 @@
 package com.example.powerscout;
 
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
-
+import android.Manifest;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import java.text.ParseException;
 import com.github.mikephil.charting.charts.BarChart;
@@ -53,6 +60,7 @@ public class Dashboard extends BaseActivity {
     private DatabaseReference databaseRef;
     private TextView todayUsageTextView;
     private TextView monthUsageTextView;
+    ImageView notificationBell;
     private TextView costTextView;
     private static final double RATE_PER_KWH = 8.0;
 
@@ -78,6 +86,53 @@ public class Dashboard extends BaseActivity {
         TextView dateTextView = findViewById(R.id.dateTextView);
         String currentDate = new SimpleDateFormat("MMM dd", Locale.getDefault()).format(new Date());
         dateTextView.setText(currentDate);
+
+        notificationBell = findViewById(R.id.notificationBell);
+
+        if (notificationBell != null) {
+            notificationBell.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Trigger the action when the bell icon is clicked
+                    fetchNotificationsFromRealtimeDatabase();
+                }
+            });
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
+        startService(new Intent(this, ConsumptionService.class));
+
+    }
+
+    // Fetch notifications from Realtime Database
+    private void fetchNotificationsFromRealtimeDatabase() {
+        DatabaseReference notificationsRef = FirebaseDatabase.getInstance().getReference("notifications");
+
+        notificationsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<String> notifications = new ArrayList<>();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    String notificationMessage = snapshot.getValue(String.class);
+                    notifications.add(notificationMessage);
+                }
+
+                // Pass notifications to NotificationActivity
+                Intent intent = new Intent(Dashboard.this, NotificationActivity.class);
+                intent.putStringArrayListExtra("notifications", (ArrayList<String>) notifications);
+                startActivity(intent);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e("Dashboard", "Error fetching notifications: ", databaseError.toException());
+            }
+        });
     }
 
     private void fetchDataAndUpdateCharts() {
