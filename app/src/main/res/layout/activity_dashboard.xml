@@ -109,6 +109,23 @@
                             android:textColor="#1E88E5"/>
                     </LinearLayout>
                 </LinearLayout>
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/costCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardElevation="4dp"
+                    app:cardCornerRadius="8dp"
+                    android:layout_margin="16dp">
+
+                    <TextView
+                        android:id="@+id/costTextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp"
+                        android:text="Cost: ₹0.00"
+                        android:textSize="18sp"
+                        android:textColor="@android:color/black" />
+                </androidx.cardview.widget.CardView>
 
                 <!-- Pie Chart -->
                 <com.github.mikephil.charting.charts.PieChart

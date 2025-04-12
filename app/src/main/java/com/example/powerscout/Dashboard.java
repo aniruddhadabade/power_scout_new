@@ -53,6 +53,8 @@ public class Dashboard extends BaseActivity {
     private DatabaseReference databaseRef;
     private TextView todayUsageTextView;
     private TextView monthUsageTextView;
+    private TextView costTextView;
+    private static final double RATE_PER_KWH = 8.0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +70,7 @@ public class Dashboard extends BaseActivity {
         databaseRef = FirebaseDatabase.getInstance().getReference("sensor");
         todayUsageTextView = findViewById(R.id.todayUsage);
         monthUsageTextView = findViewById(R.id.monthUsage);
+        costTextView = findViewById(R.id.costTextView);
         pieChart = findViewById(R.id.pieChart);
         barChart = findViewById(R.id.barChart);
 
@@ -95,6 +98,11 @@ public class Dashboard extends BaseActivity {
                     updatePieChart(energy);
 
                     updateBarChart(energy);
+
+                    double cost = energy * RATE_PER_KWH;
+                    costTextView.setText(
+                            String.format(Locale.getDefault(), "Cost: ₹%.2f", cost)
+                    );
                 }
             }
 
