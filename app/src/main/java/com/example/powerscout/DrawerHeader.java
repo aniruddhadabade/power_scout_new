@@ -15,7 +15,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class DrawerHeader extends AppCompatActivity {
 
     private TextView textUserName, textUserEmail;
-//    private ImageView userImage;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
@@ -26,12 +25,11 @@ public class DrawerHeader extends AppCompatActivity {
 
         // Initialize Firebase Auth and Firestore
         mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
+        db   = FirebaseFirestore.getInstance();
 
         // Initialize UI elements
-        textUserName = findViewById(R.id.textUserName);
+        textUserName  = findViewById(R.id.textUserName);
         textUserEmail = findViewById(R.id.textUserEmail);
-
 
         // Fetch user details from Firestore
         loadUserInfo();
@@ -39,30 +37,42 @@ public class DrawerHeader extends AppCompatActivity {
 
     private void loadUserInfo() {
         FirebaseUser user = mAuth.getCurrentUser();
-
-        if (user != null) {
-            String uid = user.getUid();
-
-            // Reference Firestore document
-            DocumentReference userRef = db.collection("users").document(uid);
-            userRef.get().addOnSuccessListener(documentSnapshot -> {
-                if (documentSnapshot.exists()) {
-                    // Fetch username and email from Firestore
-                    String username = documentSnapshot.getString("username");
-                    String email = documentSnapshot.getString("email");
-
-                    // Update UI with fetched data
-                    textUserName.setText(username != null ? username : "User Name");
-                    textUserEmail.setText(email != null ? email : "User Email");
-
-                } else {
-                    Toast.makeText(this, "User data not found.", Toast.LENGTH_SHORT).show();
-                }
-            }).addOnFailureListener(e -> {
-                Toast.makeText(this, "Failed to load user data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            });
-        } else {
+        if (user == null) {
             Toast.makeText(this, "User not logged in.", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        String uid = user.getUid();
+        DocumentReference userRef = db.collection("users").document(uid);
+        userRef.get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (!documentSnapshot.exists()) {
+                        Toast.makeText(this, "User data not found.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    // Get fields (ensure these keys match your Firestore docs)
+                    String username = documentSnapshot.getString("username");
+                    String email    = documentSnapshot.getString("email");
+
+                    textUserName.setText(
+                            username != null && !username.isEmpty()
+                                    ? username
+                                    : "No Name"
+                    );
+                    textUserEmail.setText(
+                            email != null && !email.isEmpty()
+                                    ? email
+                                    : "No Email"
+                    );
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(
+                                this,
+                                "Failed to load user data: " + e.getMessage(),
+                                Toast.LENGTH_SHORT
+                        ).show()
+                );
     }
 }
+
