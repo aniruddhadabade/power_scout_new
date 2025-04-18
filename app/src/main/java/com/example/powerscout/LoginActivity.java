@@ -3,6 +3,7 @@ package com.example.powerscout;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.EditText;
@@ -14,6 +15,11 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -27,6 +33,12 @@ import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -100,16 +112,27 @@ public class LoginActivity extends AppCompatActivity {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        showLoginSuccessSnackbar();
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            // Get Firebase ID Token
+                            user.getIdToken(true).addOnCompleteListener(tokenTask -> {
+                                if (tokenTask.isSuccessful()) {
+                                    String idToken = tokenTask.getResult().getToken();
+                                    sendTokenToCloudRun(idToken); // Send token to Cloud Run for verification
+                                    Intent intent = new Intent(LoginActivity.this, complete_info1.class);
+                                } else {
+                                    Toast.makeText(LoginActivity.this, "Failed to retrieve token", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
                     } else {
                         findViewById(R.id.button2).setEnabled(true);
                         Exception exception = task.getException();
                         Toast.makeText(LoginActivity.this, "Login failed: " + exception.getMessage(), Toast.LENGTH_LONG).show();
                     }
-                    
                 });
-
     }
+
 
     private void showLoginSuccessSnackbar() {
         Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content), "Login Successful!", Snackbar.LENGTH_SHORT);
@@ -118,19 +141,84 @@ public class LoginActivity extends AppCompatActivity {
         snackbar.show();
 
         // Immediately redirect to HomeActivity
-        Intent intent = new Intent(LoginActivity.this, Dashboard.class);
+        Intent intent = new Intent(LoginActivity.this, complete_info1.class);
         startActivity(intent);
         finish();
     }
 
+    private void sendTokenToCloudRun(String token) {
+        String cloudRunUrl = "https://verifytoken-z724mvhueq-uc.a.run.app";  // Cloud Run URL
 
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, cloudRunUrl,
+                response -> {
+                    // Handle the response from Cloud Run
+                    try {
+                        JSONObject jsonResponse = new JSONObject(response);
+                        String message = jsonResponse.getString("message");
+                        if (message.equals("Token is valid")) {
+                            String uid = jsonResponse.getString("uid");  // Get UID from response
+                            // Pass UID for further processing
+                            passUidToESP8266(uid);  // Send UID to ESP8266 or handle it for further processing
+                        } else {
+                            Toast.makeText(LoginActivity.this, "Authentication failed", Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(LoginActivity.this, "Error processing response", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        String errorMessage = error.getMessage();
+                        if (error.networkResponse != null) {
+                            errorMessage = "HTTP " + error.networkResponse.statusCode;
+                        }
+                        Log.e("Volley Error", errorMessage);
+                        Toast.makeText(LoginActivity.this, "Error sending token to Cloud Run", Toast.LENGTH_SHORT).show();
+                    }
+                }) {
+            @Override
+            public Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("token", token);  // Sending Firebase token
+                return params;
+            }
+        };
 
-    private void checkUserInFirestore(String email) {
-        // Assuming the user exists and moving to MainActivity
-        Intent intent = new Intent(LoginActivity.this, activity_update_info1.class);
-        startActivity(intent);
-        finish();
+        // Add the request to the queue
+        Volley.newRequestQueue(this).add(stringRequest);
     }
+
+    private void passUidToESP8266(String uid) {
+        String esp8266Url = "http://192.168.62.24/sendUid";  // Replace with your actual ESP8266 endpoint
+
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, esp8266Url,
+                response -> {
+                    Log.d("ESP8266 Response", response);
+                    // Assuming successful response from ESP8266, show login success and redirect to Dashboard
+                    showLoginSuccessSnackbar();  // This should navigate to the Dashboard
+                },
+                error -> {
+                    String errorMsg = (error.getMessage() != null) ? error.getMessage() : "Unknown error";
+                    Log.e("ESP8266 Error", errorMsg);
+                    error.printStackTrace(); // Optional for detailed debugging
+                    Toast.makeText(LoginActivity.this, "Failed to connect with ESP", Toast.LENGTH_SHORT).show();
+                }) {
+            @Override
+            public Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("uid", uid);  // Sending UID to ESP8266
+                return params;
+            }
+        };
+
+        // Add the request to the queue
+        Volley.newRequestQueue(this).add(stringRequest);
+    }
+
+
+
 
     private void signInWithGoogle() {
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
@@ -167,5 +255,12 @@ public class LoginActivity extends AppCompatActivity {
                         Toast.makeText(LoginActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    private void checkUserInFirestore(String email) {
+        // Assuming the user exists and moving to MainActivity
+        Intent intent = new Intent(LoginActivity.this, activity_update_info1.class);
+        startActivity(intent);
+        finish();
     }
 }
