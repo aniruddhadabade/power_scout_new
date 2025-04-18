@@ -149,8 +149,9 @@
                 <com.github.mikephil.charting.charts.PieChart
                     android:id="@+id/pieChart"
                     android:layout_width="match_parent"
-                    android:layout_height="200dp"
-                    android:layout_marginBottom="16dp"/>
+                    android:layout_height="300dp"
+                    android:layout_margin="16dp"
+                    android:layout_gravity="center"/>
 
                 <!-- CardView with Month, Year, Total Tabs and Bar Chart -->
                 <androidx.cardview.widget.CardView
@@ -175,6 +176,7 @@
                             android:gravity="center">
 
                             <TextView
+                                android:id="@+id/textMonth"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Month"
@@ -184,6 +186,7 @@
                                 android:textStyle="bold"/>
 
                             <TextView
+                                android:id="@+id/textYear"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Year"
@@ -192,6 +195,7 @@
                                 android:textColor="#757575"/>
 
                             <TextView
+                                android:id="@+id/textTotal"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Total"
