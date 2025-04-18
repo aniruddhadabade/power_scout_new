@@ -1,0 +1,793 @@
+Index: app/src/main/res/values/strings.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><resources>\r\n    <string name=\"app_name\">PowerScout</string>\r\n    <string name=\"title_activity_splash\">SplashActivity</string>\r\n    <string name=\"default_web_client_id\">403488565329-3ntbedqgir4npi0kgqmbumt4i758pvd9.apps.googleusercontent.com</string>\r\n    <string name=\"terms_and_conditions\">\r\n    Terms and Conditions for Power Scout App\\n\\n\r\n    Welcome to Power Scout! These Terms and Conditions govern your use of the Power Scout mobile application (the \"App\").\r\n    By downloading, accessing, or using the App, you agree to comply with these Terms. If you do not agree, please do not use the App.\\n\\n\r\n\r\n    1. Use of the App\\n\r\n    The App is designed to help users track and optimize their energy consumption.\\n\r\n    You must be at least 13 years old to use the App.\\n\r\n    You agree to use the App for lawful purposes only.\\n\r\n    Unauthorized modification, distribution, or reverse-engineering of the App is prohibited.\\n\\n\r\n\r\n    2. Data Collection and Privacy\\n\r\n    The App may collect energy usage data, device information, and user preferences to improve the service.\\n\r\n    Any personal data collected is subject to our Privacy Policy.\\n\r\n    We do not sell, trade, or misuse user data.\\n\\n\r\n\r\n    3. Accuracy of Information\\n\r\n    The energy tracking insights provided by the App are based on available data and estimates.\r\n    They should not be considered as absolute values.\\n\r\n    We are not responsible for any financial or energy-related decisions made based on the App’s data.\\n\\n\r\n\r\n    4. Third-Party Services\\n\r\n    The App may include links or integration with third-party services or APIs.\\n\r\n    We are not responsible for the content or security of third-party services.\\n\\n\r\n\r\n    5. Limitation of Liability\\n\r\n    The App is provided \"as is\" without warranties of any kind.\\n\r\n    We do not guarantee that the App will be error-free or continuously available.\\n\r\n    We are not responsible for any direct, indirect, or incidental damages resulting from the use of the App.\\n\\n\r\n\r\n    6. Changes to the Terms\\n\r\n    We reserve the right to update these Terms at any time.\\n\r\n    Continued use of the App after updates constitutes acceptance of the revised Terms.\\n\\n\r\n\r\n    7. Termination\\n\r\n    We may suspend or terminate your access to the App if you violate these Terms.\\n\r\n    You may stop using the App at any time.\\n\\n\r\n\r\n    8. Contact Information\\n\r\n    For any questions or concerns regarding these Terms, contact us at [Your Email/Support Page].\\n\\n\r\n\r\n    By using the Power Scout App, you agree to these Terms and Conditions.\r\n</string>\r\n\r\n\r\n</resources>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+--- a/app/src/main/res/values/strings.xml	(revision b128d93abcac4418aeca0f0bf18f00a07ffed84f)
++++ b/app/src/main/res/values/strings.xml	(date 1744983630705)
+@@ -45,6 +45,9 @@
+ 
+     By using the Power Scout App, you agree to these Terms and Conditions.
+ </string>
++    <string name="esp8266_url">http://192.168.62.24/getSensorData</string>
++
++
+ 
+ 
+ </resources>
+\ No newline at end of file
+Index: app/src/main/java/com/example/powerscout/LoginActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.powerscout;\r\n\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.os.Handler;\r\nimport android.util.Patterns;\r\nimport android.view.View;\r\nimport android.widget.EditText;\r\nimport android.widget.TextView;\r\nimport android.widget.Toast;\r\n\r\nimport androidx.annotation.NonNull;\r\nimport androidx.appcompat.app.AlertDialog;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport androidx.core.content.ContextCompat;\r\n\r\nimport com.google.android.gms.auth.api.signin.GoogleSignIn;\r\nimport com.google.android.gms.auth.api.signin.GoogleSignInAccount;\r\nimport com.google.android.gms.auth.api.signin.GoogleSignInOptions;\r\nimport com.google.android.gms.auth.api.signin.GoogleSignInClient;\r\nimport com.google.android.gms.common.api.ApiException; // Add this import\r\nimport com.google.android.material.snackbar.Snackbar;\r\nimport com.google.firebase.auth.AuthCredential; // Add this import\r\nimport com.google.firebase.auth.FirebaseAuth;\r\nimport com.google.firebase.auth.FirebaseUser;\r\nimport com.google.firebase.auth.GoogleAuthProvider;\r\nimport com.google.firebase.firestore.FirebaseFirestore;\r\nimport com.google.android.gms.tasks.OnCompleteListener;\r\nimport com.google.android.gms.tasks.Task;\r\n\r\npublic class LoginActivity extends AppCompatActivity {\r\n\r\n    private EditText editTextEmail, editTextPassword;\r\n    private TextView recoverPasswordText;\r\n    private FirebaseAuth mAuth;\r\n    private FirebaseFirestore db;\r\n\r\n    // Google Sign-In\r\n    private GoogleSignInClient mGoogleSignInClient;\r\n    private static final int RC_SIGN_IN = 9001;  // Request code for Google Sign-In\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_login);\r\n\r\n        // Initialize Firebase Auth\r\n        mAuth = FirebaseAuth.getInstance();\r\n        db = FirebaseFirestore.getInstance();\r\n\r\n        // Initialize UI elements\r\n        editTextEmail = findViewById(R.id.editTextUserName);\r\n        editTextPassword = findViewById(R.id.editTextPassword);\r\n        recoverPasswordText = findViewById(R.id.textView6);\r\n\r\n        // Configure Google Sign-In\r\n        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)\r\n                .requestIdToken(getString(R.string.default_web_client_id))  // Get your Web Client ID from Firebase\r\n                .requestEmail()\r\n                .build();\r\n        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);\r\n\r\n        // Set click listeners\r\n        recoverPasswordText.setOnClickListener(v -> {\r\n            // Navigate to ResetPasswordActivity\r\n            Intent resetPasswordIntent = new Intent(LoginActivity.this, ResetPasswordActivity.class);\r\n            startActivity(resetPasswordIntent);\r\n        });\r\n\r\n        findViewById(R.id.button2).setOnClickListener(v -> userLogin());\r\n\r\n        // Google Sign-In Button Click\r\n        findViewById(R.id.google_sign_in_button).setOnClickListener(v -> signInWithGoogle());\r\n    }\r\n\r\n    private void userLogin() {\r\n        String email = editTextEmail.getText().toString().trim();\r\n        String password = editTextPassword.getText().toString().trim();\r\n\r\n        if (email.isEmpty()) {\r\n            editTextEmail.setError(\"Email is required!\");\r\n            editTextEmail.requestFocus();\r\n            return;\r\n        }\r\n\r\n        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {\r\n            editTextEmail.setError(\"Please enter a valid email address!\");\r\n            editTextEmail.requestFocus();\r\n            return;\r\n        }\r\n\r\n        if (password.isEmpty()) {\r\n            editTextPassword.setError(\"Password is required!\");\r\n            editTextPassword.requestFocus();\r\n            return;\r\n        }\r\n\r\n        findViewById(R.id.button2).setEnabled(false);\r\n\r\n        mAuth.signInWithEmailAndPassword(email, password)\r\n                .addOnCompleteListener(this, task -> {\r\n                    if (task.isSuccessful()) {\r\n                        showLoginSuccessSnackbar();\r\n                    } else {\r\n                        findViewById(R.id.button2).setEnabled(true);\r\n                        Exception exception = task.getException();\r\n                        Toast.makeText(LoginActivity.this, \"Login failed: \" + exception.getMessage(), Toast.LENGTH_LONG).show();\r\n                    }\r\n                    \r\n                });\r\n\r\n    }\r\n\r\n    private void showLoginSuccessSnackbar() {\r\n        Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content), \"Login Successful!\", Snackbar.LENGTH_SHORT);\r\n        snackbar.setBackgroundTint(ContextCompat.getColor(this, R.color.blue)); // Customize background color\r\n        snackbar.setTextColor(ContextCompat.getColor(this, R.color.white)); // Customize text color\r\n        snackbar.show();\r\n\r\n        // Immediately redirect to HomeActivity\r\n        Intent intent = new Intent(LoginActivity.this, Dashboard.class);\r\n        startActivity(intent);\r\n        finish();\r\n    }\r\n\r\n\r\n\r\n    private void checkUserInFirestore(String email) {\r\n        // Assuming the user exists and moving to MainActivity\r\n        Intent intent = new Intent(LoginActivity.this, activity_update_info1.class);\r\n        startActivity(intent);\r\n        finish();\r\n    }\r\n\r\n    private void signInWithGoogle() {\r\n        Intent signInIntent = mGoogleSignInClient.getSignInIntent();\r\n        startActivityForResult(signInIntent, RC_SIGN_IN);\r\n    }\r\n\r\n    @Override\r\n    public void onActivityResult(int requestCode, int resultCode, Intent data) {\r\n        super.onActivityResult(requestCode, resultCode, data);\r\n\r\n        if (requestCode == RC_SIGN_IN) {\r\n            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);\r\n            handleSignInResult(task);\r\n        }\r\n    }\r\n\r\n    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {\r\n        try {\r\n            GoogleSignInAccount account = completedTask.getResult(ApiException.class); // Use ApiException here\r\n            firebaseAuthWithGoogle(account);\r\n        } catch (ApiException e) {\r\n            Toast.makeText(this, \"Google Sign-In failed: \" + e.getMessage(), Toast.LENGTH_SHORT).show();\r\n        }\r\n    }\r\n\r\n    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {\r\n        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null); // AuthCredential\r\n        mAuth.signInWithCredential(credential)\r\n                .addOnCompleteListener(this, task -> {\r\n                    if (task.isSuccessful()) {\r\n                        FirebaseUser user = mAuth.getCurrentUser();\r\n                        checkUserInFirestore(user.getEmail());\r\n                    } else {\r\n                        Toast.makeText(LoginActivity.this, \"Authentication failed.\", Toast.LENGTH_SHORT).show();\r\n                    }\r\n                });\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/powerscout/LoginActivity.java b/app/src/main/java/com/example/powerscout/LoginActivity.java
+--- a/app/src/main/java/com/example/powerscout/LoginActivity.java	(revision b128d93abcac4418aeca0f0bf18f00a07ffed84f)
++++ b/app/src/main/java/com/example/powerscout/LoginActivity.java	(date 1744984005910)
+@@ -3,6 +3,7 @@
+ import android.content.Intent;
+ import android.os.Bundle;
+ import android.os.Handler;
++import android.util.Log;
+ import android.util.Patterns;
+ import android.view.View;
+ import android.widget.EditText;
+@@ -14,6 +15,11 @@
+ import androidx.appcompat.app.AppCompatActivity;
+ import androidx.core.content.ContextCompat;
+ 
++import com.android.volley.Request;
++import com.android.volley.Response;
++import com.android.volley.VolleyError;
++import com.android.volley.toolbox.StringRequest;
++import com.android.volley.toolbox.Volley;
+ import com.google.android.gms.auth.api.signin.GoogleSignIn;
+ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+@@ -28,6 +34,12 @@
+ import com.google.android.gms.tasks.OnCompleteListener;
+ import com.google.android.gms.tasks.Task;
+ 
++import org.json.JSONException;
++import org.json.JSONObject;
++
++import java.util.HashMap;
++import java.util.Map;
++
+ public class LoginActivity extends AppCompatActivity {
+ 
+     private EditText editTextEmail, editTextPassword;
+@@ -100,16 +112,27 @@
+         mAuth.signInWithEmailAndPassword(email, password)
+                 .addOnCompleteListener(this, task -> {
+                     if (task.isSuccessful()) {
+-                        showLoginSuccessSnackbar();
++                        FirebaseUser user = mAuth.getCurrentUser();
++                        if (user != null) {
++                            // Get Firebase ID Token
++                            user.getIdToken(true).addOnCompleteListener(tokenTask -> {
++                                if (tokenTask.isSuccessful()) {
++                                    String idToken = tokenTask.getResult().getToken();
++                                    sendTokenToCloudRun(idToken); // Send token to Cloud Run for verification
++                                    Intent intent = new Intent(LoginActivity.this, complete_info1.class);
++                                } else {
++                                    Toast.makeText(LoginActivity.this, "Failed to retrieve token", Toast.LENGTH_SHORT).show();
++                                }
++                            });
++                        }
+                     } else {
+                         findViewById(R.id.button2).setEnabled(true);
+                         Exception exception = task.getException();
+                         Toast.makeText(LoginActivity.this, "Login failed: " + exception.getMessage(), Toast.LENGTH_LONG).show();
+                     }
+-                    
+                 });
++    }
+ 
+-    }
+ 
+     private void showLoginSuccessSnackbar() {
+         Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content), "Login Successful!", Snackbar.LENGTH_SHORT);
+@@ -118,19 +141,84 @@
+         snackbar.show();
+ 
+         // Immediately redirect to HomeActivity
+-        Intent intent = new Intent(LoginActivity.this, Dashboard.class);
++        Intent intent = new Intent(LoginActivity.this, complete_info1.class);
+         startActivity(intent);
+         finish();
+     }
+ 
++    private void sendTokenToCloudRun(String token) {
++        String cloudRunUrl = "https://verifytoken-z724mvhueq-uc.a.run.app";  // Cloud Run URL
+ 
++        StringRequest stringRequest = new StringRequest(Request.Method.POST, cloudRunUrl,
++                response -> {
++                    // Handle the response from Cloud Run
++                    try {
++                        JSONObject jsonResponse = new JSONObject(response);
++                        String message = jsonResponse.getString("message");
++                        if (message.equals("Token is valid")) {
++                            String uid = jsonResponse.getString("uid");  // Get UID from response
++                            // Pass UID for further processing
++                            passUidToESP8266(uid);  // Send UID to ESP8266 or handle it for further processing
++                        } else {
++                            Toast.makeText(LoginActivity.this, "Authentication failed", Toast.LENGTH_SHORT).show();
++                        }
++                    } catch (JSONException e) {
++                        e.printStackTrace();
++                        Toast.makeText(LoginActivity.this, "Error processing response", Toast.LENGTH_SHORT).show();
++                    }
++                },
++                new Response.ErrorListener() {
++                    @Override
++                    public void onErrorResponse(VolleyError error) {
++                        String errorMessage = error.getMessage();
++                        if (error.networkResponse != null) {
++                            errorMessage = "HTTP " + error.networkResponse.statusCode;
++                        }
++                        Log.e("Volley Error", errorMessage);
++                        Toast.makeText(LoginActivity.this, "Error sending token to Cloud Run", Toast.LENGTH_SHORT).show();
++                    }
++                }) {
++            @Override
++            public Map<String, String> getParams() {
++                Map<String, String> params = new HashMap<>();
++                params.put("token", token);  // Sending Firebase token
++                return params;
++            }
++        };
+ 
+-    private void checkUserInFirestore(String email) {
+-        // Assuming the user exists and moving to MainActivity
+-        Intent intent = new Intent(LoginActivity.this, activity_update_info1.class);
+-        startActivity(intent);
+-        finish();
++        // Add the request to the queue
++        Volley.newRequestQueue(this).add(stringRequest);
+     }
++
++    private void passUidToESP8266(String uid) {
++        String esp8266Url = "http://192.168.62.24/sendUid";  // Replace with your actual ESP8266 endpoint
++
++        StringRequest stringRequest = new StringRequest(Request.Method.POST, esp8266Url,
++                response -> {
++                    Log.d("ESP8266 Response", response);
++                    // Assuming successful response from ESP8266, show login success and redirect to Dashboard
++                    showLoginSuccessSnackbar();  // This should navigate to the Dashboard
++                },
++                error -> {
++                    String errorMsg = (error.getMessage() != null) ? error.getMessage() : "Unknown error";
++                    Log.e("ESP8266 Error", errorMsg);
++                    error.printStackTrace(); // Optional for detailed debugging
++                    Toast.makeText(LoginActivity.this, "Failed to connect with ESP", Toast.LENGTH_SHORT).show();
++                }) {
++            @Override
++            public Map<String, String> getParams() {
++                Map<String, String> params = new HashMap<>();
++                params.put("uid", uid);  // Sending UID to ESP8266
++                return params;
++            }
++        };
++
++        // Add the request to the queue
++        Volley.newRequestQueue(this).add(stringRequest);
++    }
++
++
++
+ 
+     private void signInWithGoogle() {
+         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+@@ -168,4 +256,11 @@
+                     }
+                 });
+     }
++
++    private void checkUserInFirestore(String email) {
++        // Assuming the user exists and moving to MainActivity
++        Intent intent = new Intent(LoginActivity.this, activity_update_info1.class);
++        startActivity(intent);
++        finish();
++    }
+ }
+Index: app/src/main/AndroidManifest.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\"\r\n    package=\"com.example.powerscout\">\r\n    <!-- Permission to access the internet -->\r\n    <uses-permission android:name=\"android.permission.INTERNET\" />\r\n\r\n    <uses-permission android:name=\"android.permission.FOREGROUND_SERVICE\" />\r\n    <uses-permission android:name=\"android.permission.FOREGROUND_SERVICE_DATA_SYNC\" />\r\n    <uses-permission android:name=\"android.permission.POST_NOTIFICATIONS\" android:permissionGroup=\"android.permission-group.NOTIFICATIONS\"/>\r\n\r\n\r\n\r\n    <application\r\n        android:allowBackup=\"true\"\r\n        android:dataExtractionRules=\"@xml/data_extraction_rules\"\r\n        android:fullBackupContent=\"@xml/backup_rules\"\r\n        android:icon=\"@mipmap/ic_launcher_power\"\r\n        android:label=\"@string/app_name\"\r\n        android:roundIcon=\"@mipmap/ic_launcher_power\"\r\n        android:supportsRtl=\"true\"\r\n        android:theme=\"@style/Theme.PowerScout\"\r\n        tools:targetApi=\"31\">\r\n        <activity\r\n            android:name=\".NotificationActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Dashboard\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".ContactUsActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".TermsConditionActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".FeedbackActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".EnergySavingActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".complete_info3\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".complete_info2\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".complete_info1\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".activity_update_info2\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".activity_update_info1\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".activity_update_info3\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".NavigationContent\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".DrawerHeader\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".HomeActivity\"\r\n            android:exported=\"false\" /> <!-- SplashActivity is the launcher activity -->\r\n        <activity\r\n            android:name=\".SplashActivity\"\r\n            android:exported=\"true\"\r\n            android:theme=\"@style/Theme.Design.NoActionBar\">\r\n            <intent-filter>\r\n                <action android:name=\"android.intent.action.MAIN\" />\r\n\r\n                <category android:name=\"android.intent.category.LAUNCHER\" />\r\n            </intent-filter>\r\n        </activity> <!-- MainActivity should be the first screen after SplashActivity -->\r\n        <activity\r\n            android:name=\".MainActivity\"\r\n            android:exported=\"true\"\r\n            android:theme=\"@style/Theme.PowerScout\" /> <!-- Other activities -->\r\n        <activity\r\n            android:name=\".LoginActivity\"\r\n            android:exported=\"true\" />\r\n        <activity\r\n            android:name=\".Register1Activity\"\r\n            android:exported=\"true\"\r\n            android:windowSoftInputMode=\"adjustResize\" />\r\n        <activity\r\n            android:name=\".Register2Activity\"\r\n            android:exported=\"true\" />\r\n        <activity\r\n            android:name=\".ResetPasswordActivity\"\r\n            android:exported=\"true\" />\r\n        <service\r\n            android:name=\".ConsumptionService\"\r\n            android:enabled=\"true\"\r\n            android:exported=\"false\"\r\n            android:foregroundServiceType=\"dataSync\" />\r\n\r\n    </application>\r\n\r\n</manifest>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+--- a/app/src/main/AndroidManifest.xml	(revision b128d93abcac4418aeca0f0bf18f00a07ffed84f)
++++ b/app/src/main/AndroidManifest.xml	(date 1744885823328)
+@@ -12,6 +12,7 @@
+ 
+ 
+     <application
++        android:networkSecurityConfig="@xml/network_security_config"
+         android:allowBackup="true"
+         android:dataExtractionRules="@xml/data_extraction_rules"
+         android:fullBackupContent="@xml/backup_rules"
+Index: .idea/other.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/other.xml b/.idea/other.xml
+deleted file mode 100644
+--- a/.idea/other.xml	(revision b128d93abcac4418aeca0f0bf18f00a07ffed84f)
++++ /dev/null	(revision b128d93abcac4418aeca0f0bf18f00a07ffed84f)
+@@ -1,549 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<project version="4">
+-  <component name="direct_access_persist.xml">
+-    <option name="deviceSelectionList">
+-      <list>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="27" />
+-          <option name="brand" value="DOCOMO" />
+-          <option name="codename" value="F01L" />
+-          <option name="id" value="F01L" />
+-          <option name="manufacturer" value="FUJITSU" />
+-          <option name="name" value="F-01L" />
+-          <option name="screenDensity" value="360" />
+-          <option name="screenX" value="720" />
+-          <option name="screenY" value="1280" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="OnePlus" />
+-          <option name="codename" value="OP5552L1" />
+-          <option name="id" value="OP5552L1" />
+-          <option name="manufacturer" value="OnePlus" />
+-          <option name="name" value="CPH2415" />
+-          <option name="screenDensity" value="480" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2412" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="OPPO" />
+-          <option name="codename" value="OP573DL1" />
+-          <option name="id" value="OP573DL1" />
+-          <option name="manufacturer" value="OPPO" />
+-          <option name="name" value="CPH2557" />
+-          <option name="screenDensity" value="480" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2400" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="28" />
+-          <option name="brand" value="DOCOMO" />
+-          <option name="codename" value="SH-01L" />
+-          <option name="id" value="SH-01L" />
+-          <option name="manufacturer" value="SHARP" />
+-          <option name="name" value="AQUOS sense2 SH-01L" />
+-          <option name="screenDensity" value="480" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2160" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="Lenovo" />
+-          <option name="codename" value="TB370FU" />
+-          <option name="id" value="TB370FU" />
+-          <option name="manufacturer" value="Lenovo" />
+-          <option name="name" value="Tab P12" />
+-          <option name="screenDensity" value="340" />
+-          <option name="screenX" value="1840" />
+-          <option name="screenY" value="2944" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="a15" />
+-          <option name="id" value="a15" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="A15" />
+-          <option name="screenDensity" value="450" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2340" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="a35x" />
+-          <option name="id" value="a35x" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="A35" />
+-          <option name="screenDensity" value="450" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2340" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="31" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="a51" />
+-          <option name="id" value="a51" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="Galaxy A51" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2400" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="akita" />
+-          <option name="id" value="akita" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 8a" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2400" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="motorola" />
+-          <option name="codename" value="arcfox" />
+-          <option name="id" value="arcfox" />
+-          <option name="manufacturer" value="Motorola" />
+-          <option name="name" value="razr plus 2024" />
+-          <option name="screenDensity" value="360" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="1272" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="33" />
+-          <option name="brand" value="motorola" />
+-          <option name="codename" value="austin" />
+-          <option name="id" value="austin" />
+-          <option name="manufacturer" value="Motorola" />
+-          <option name="name" value="moto g 5G (2022)" />
+-          <option name="screenDensity" value="280" />
+-          <option name="screenX" value="720" />
+-          <option name="screenY" value="1600" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="33" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="b0q" />
+-          <option name="id" value="b0q" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="Galaxy S22 Ultra" />
+-          <option name="screenDensity" value="600" />
+-          <option name="screenX" value="1440" />
+-          <option name="screenY" value="3088" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="32" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="bluejay" />
+-          <option name="id" value="bluejay" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 6a" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2400" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="caiman" />
+-          <option name="id" value="caiman" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 9 Pro" />
+-          <option name="screenDensity" value="360" />
+-          <option name="screenX" value="960" />
+-          <option name="screenY" value="2142" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="comet" />
+-          <option name="id" value="comet" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 9 Pro Fold" />
+-          <option name="screenDensity" value="390" />
+-          <option name="screenX" value="2076" />
+-          <option name="screenY" value="2152" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="29" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="crownqlteue" />
+-          <option name="id" value="crownqlteue" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="Galaxy Note9" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="2220" />
+-          <option name="screenY" value="1080" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="dm2q" />
+-          <option name="id" value="dm2q" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="S23 Plus" />
+-          <option name="screenDensity" value="450" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2340" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="dm3q" />
+-          <option name="id" value="dm3q" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="Galaxy S23 Ultra" />
+-          <option name="screenDensity" value="600" />
+-          <option name="screenX" value="1440" />
+-          <option name="screenY" value="3088" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="e1q" />
+-          <option name="id" value="e1q" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="Galaxy S24" />
+-          <option name="screenDensity" value="480" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2340" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="e3q" />
+-          <option name="id" value="e3q" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="Galaxy S24 Ultra" />
+-          <option name="screenDensity" value="450" />
+-          <option name="screenX" value="1440" />
+-          <option name="screenY" value="3120" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="33" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="eos" />
+-          <option name="id" value="eos" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Eos" />
+-          <option name="screenDensity" value="320" />
+-          <option name="screenX" value="384" />
+-          <option name="screenY" value="384" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="33" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="felix" />
+-          <option name="id" value="felix" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel Fold" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="2208" />
+-          <option name="screenY" value="1840" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="felix" />
+-          <option name="id" value="felix" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel Fold" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="2208" />
+-          <option name="screenY" value="1840" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="33" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="felix_camera" />
+-          <option name="id" value="felix_camera" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel Fold (Camera-enabled)" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="2208" />
+-          <option name="screenY" value="1840" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="motorola" />
+-          <option name="codename" value="fogona" />
+-          <option name="id" value="fogona" />
+-          <option name="manufacturer" value="Motorola" />
+-          <option name="name" value="moto g play - 2024" />
+-          <option name="screenDensity" value="280" />
+-          <option name="screenX" value="720" />
+-          <option name="screenY" value="1600" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="g0q" />
+-          <option name="id" value="g0q" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="SM-S906U1" />
+-          <option name="screenDensity" value="450" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2340" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="gta9pwifi" />
+-          <option name="id" value="gta9pwifi" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="SM-X210" />
+-          <option name="screenDensity" value="240" />
+-          <option name="screenX" value="1200" />
+-          <option name="screenY" value="1920" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="gts7xllite" />
+-          <option name="id" value="gts7xllite" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="SM-T738U" />
+-          <option name="screenDensity" value="340" />
+-          <option name="screenX" value="1600" />
+-          <option name="screenY" value="2560" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="33" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="gts8uwifi" />
+-          <option name="id" value="gts8uwifi" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="Galaxy Tab S8 Ultra" />
+-          <option name="screenDensity" value="320" />
+-          <option name="screenX" value="1848" />
+-          <option name="screenY" value="2960" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="gts8wifi" />
+-          <option name="id" value="gts8wifi" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="Galaxy Tab S8" />
+-          <option name="screenDensity" value="274" />
+-          <option name="screenX" value="1600" />
+-          <option name="screenY" value="2560" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="gts9fe" />
+-          <option name="id" value="gts9fe" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="Galaxy Tab S9 FE 5G" />
+-          <option name="screenDensity" value="280" />
+-          <option name="screenX" value="1440" />
+-          <option name="screenY" value="2304" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="husky" />
+-          <option name="id" value="husky" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 8 Pro" />
+-          <option name="screenDensity" value="390" />
+-          <option name="screenX" value="1008" />
+-          <option name="screenY" value="2244" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="30" />
+-          <option name="brand" value="motorola" />
+-          <option name="codename" value="java" />
+-          <option name="id" value="java" />
+-          <option name="manufacturer" value="Motorola" />
+-          <option name="name" value="G20" />
+-          <option name="screenDensity" value="280" />
+-          <option name="screenX" value="720" />
+-          <option name="screenY" value="1600" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="komodo" />
+-          <option name="id" value="komodo" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 9 Pro XL" />
+-          <option name="screenDensity" value="360" />
+-          <option name="screenX" value="1008" />
+-          <option name="screenY" value="2244" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="33" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="lynx" />
+-          <option name="id" value="lynx" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 7a" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2400" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="33" />
+-          <option name="brand" value="motorola" />
+-          <option name="codename" value="maui" />
+-          <option name="id" value="maui" />
+-          <option name="manufacturer" value="Motorola" />
+-          <option name="name" value="moto g play - 2023" />
+-          <option name="screenDensity" value="280" />
+-          <option name="screenX" value="720" />
+-          <option name="screenY" value="1600" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="o1q" />
+-          <option name="id" value="o1q" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="Galaxy S21" />
+-          <option name="screenDensity" value="421" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2400" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="31" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="oriole" />
+-          <option name="id" value="oriole" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 6" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2400" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="33" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="panther" />
+-          <option name="id" value="panther" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 7" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2400" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="q5q" />
+-          <option name="id" value="q5q" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="Galaxy Z Fold5" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="1812" />
+-          <option name="screenY" value="2176" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="q6q" />
+-          <option name="id" value="q6q" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="Galaxy Z Fold6" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="1856" />
+-          <option name="screenY" value="2160" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="30" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="r11" />
+-          <option name="id" value="r11" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel Watch" />
+-          <option name="screenDensity" value="320" />
+-          <option name="screenX" value="384" />
+-          <option name="screenY" value="384" />
+-          <option name="type" value="WEAR_OS" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="r11q" />
+-          <option name="id" value="r11q" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="SM-S711U" />
+-          <option name="screenDensity" value="450" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2340" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="30" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="redfin" />
+-          <option name="id" value="redfin" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 5" />
+-          <option name="screenDensity" value="440" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2340" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="shiba" />
+-          <option name="id" value="shiba" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 8" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2400" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="samsung" />
+-          <option name="codename" value="t2q" />
+-          <option name="id" value="t2q" />
+-          <option name="manufacturer" value="Samsung" />
+-          <option name="name" value="Galaxy S21 Plus" />
+-          <option name="screenDensity" value="394" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2400" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="33" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="tangorpro" />
+-          <option name="id" value="tangorpro" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel Tablet" />
+-          <option name="screenDensity" value="320" />
+-          <option name="screenX" value="1600" />
+-          <option name="screenY" value="2560" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="34" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="tokay" />
+-          <option name="id" value="tokay" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 9" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2424" />
+-        </PersistentDeviceSelectionData>
+-        <PersistentDeviceSelectionData>
+-          <option name="api" value="35" />
+-          <option name="brand" value="google" />
+-          <option name="codename" value="tokay" />
+-          <option name="id" value="tokay" />
+-          <option name="manufacturer" value="Google" />
+-          <option name="name" value="Pixel 9" />
+-          <option name="screenDensity" value="420" />
+-          <option name="screenX" value="1080" />
+-          <option name="screenY" value="2424" />
+-        </PersistentDeviceSelectionData>
+-      </list>
+-    </option>
+-  </component>
+-</project>
+\ No newline at end of file
+Index: app/src/main/res/xml/network_security_config.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/xml/network_security_config.xml b/app/src/main/res/xml/network_security_config.xml
+new file mode 100644
+--- /dev/null	(date 1744983630720)
++++ b/app/src/main/res/xml/network_security_config.xml	(date 1744983630720)
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="utf-8"?>
++<network-security-config xmlns:android="http://schemas.android.com/apk/res/android">
++    <domain-config cleartextTrafficPermitted="true">
++        <domain includeSubdomains="true">192.168.62.24</domain>
++    </domain-config>
++</network-security-config>
+\ No newline at end of file
