@@ -66,6 +66,7 @@ public class BaseActivity extends AppCompatActivity {
                 startActivity(new Intent(BaseActivity.this, Dashboard.class));
             } else if (itemId == R.id.navHistory) {
                 Toast.makeText(BaseActivity.this, "History Clicked", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(BaseActivity.this, Reports_History.class));
             } else if (itemId == R.id.navContact) {
                 startActivity(new Intent(BaseActivity.this, ContactUsActivity.class));
             } else if (itemId == R.id.navFeedback) {

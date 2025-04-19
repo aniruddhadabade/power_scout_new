@@ -114,14 +114,16 @@ public class LoginActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
                         if (user != null) {
-                            // Get Firebase ID Token
+                            // ✅ Show success immediately
+                            showLoginSuccessSnackbar();
+
+                            // 🚀 Send token in background
                             user.getIdToken(true).addOnCompleteListener(tokenTask -> {
                                 if (tokenTask.isSuccessful()) {
                                     String idToken = tokenTask.getResult().getToken();
-                                    sendTokenToCloudRun(idToken); // Send token to Cloud Run for verification
-                                    Intent intent = new Intent(LoginActivity.this, complete_info1.class);
+                                    sendTokenToCloudRun(idToken); // Send silently
                                 } else {
-                                    Toast.makeText(LoginActivity.this, "Failed to retrieve token", Toast.LENGTH_SHORT).show();
+                                    Log.e("Token Error", "Failed to retrieve token");
                                 }
                             });
                         }
@@ -140,43 +142,36 @@ public class LoginActivity extends AppCompatActivity {
         snackbar.setTextColor(ContextCompat.getColor(this, R.color.white)); // Customize text color
         snackbar.show();
 
-        // Immediately redirect to HomeActivity
+        // Immediately redirect to HomeActivity (don't wait for ESP)
         Intent intent = new Intent(LoginActivity.this, complete_info1.class);
         startActivity(intent);
         finish();
     }
 
+
     private void sendTokenToCloudRun(String token) {
-        String cloudRunUrl = "https://verifytoken-z724mvhueq-uc.a.run.app";  // Cloud Run URL
+        String cloudRunUrl = "https://verifytoken-z724mvhueq-uc.a.run.app";
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, cloudRunUrl,
                 response -> {
-                    // Handle the response from Cloud Run
+                    // Cloud Run response, you can process but don't block login
                     try {
                         JSONObject jsonResponse = new JSONObject(response);
                         String message = jsonResponse.getString("message");
                         if (message.equals("Token is valid")) {
-                            String uid = jsonResponse.getString("uid");  // Get UID from response
-                            // Pass UID for further processing
-                            passUidToESP8266(uid);  // Send UID to ESP8266 or handle it for further processing
-                        } else {
-                            Toast.makeText(LoginActivity.this, "Authentication failed", Toast.LENGTH_SHORT).show();
+                            String uid = jsonResponse.getString("uid");
+                            // Pass UID to ESP8266 for further processing
+                            passUidToESP8266(uid);  // This is a background task, won't affect login
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        Toast.makeText(LoginActivity.this, "Error processing response", Toast.LENGTH_SHORT).show();
+                        // Handle error in Cloud Run response, but no need to block login
                     }
                 },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        String errorMessage = error.getMessage();
-                        if (error.networkResponse != null) {
-                            errorMessage = "HTTP " + error.networkResponse.statusCode;
-                        }
-                        Log.e("Volley Error", errorMessage);
-                        Toast.makeText(LoginActivity.this, "Error sending token to Cloud Run", Toast.LENGTH_SHORT).show();
-                    }
+                error -> {
+                    // Handle error, but login still continues
+                    Log.e("Volley Error", error.getMessage());
+                    Toast.makeText(LoginActivity.this, "Error sending token to Cloud Run", Toast.LENGTH_SHORT).show();
                 }) {
             @Override
             public Map<String, String> getParams() {
@@ -190,23 +185,24 @@ public class LoginActivity extends AppCompatActivity {
         Volley.newRequestQueue(this).add(stringRequest);
     }
 
+
+
     private void passUidToESP8266(String uid) {
-        String esp8266Url = "http://192.168.62.24/sendUid";  // Replace with your actual ESP8266 endpoint
+        String esp8266Url = "http://192.168.62.24/sendUid";
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, esp8266Url,
                 response -> {
                     Log.d("ESP8266 Response", response);
-                    // Assuming successful response from ESP8266, show login success and redirect to Dashboard
-                    showLoginSuccessSnackbar();  // This should navigate to the Dashboard
+                    // Handle successful response from ESP8266, but login already completed
+                    // No need to wait for this to complete before showing dashboard
                 },
                 error -> {
-                    String errorMsg = (error.getMessage() != null) ? error.getMessage() : "Unknown error";
-                    Log.e("ESP8266 Error", errorMsg);
-                    error.printStackTrace(); // Optional for detailed debugging
+                    Log.e("ESP8266 Error", error.toString());
+                    // If the ESP connection fails, we just log the error, but do not block login
                     Toast.makeText(LoginActivity.this, "Failed to connect with ESP", Toast.LENGTH_SHORT).show();
                 }) {
             @Override
-            public Map<String, String> getParams() {
+            protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
                 params.put("uid", uid);  // Sending UID to ESP8266
                 return params;
@@ -216,6 +212,7 @@ public class LoginActivity extends AppCompatActivity {
         // Add the request to the queue
         Volley.newRequestQueue(this).add(stringRequest);
     }
+
 
 
 
