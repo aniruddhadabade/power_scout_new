@@ -150,6 +150,7 @@
                     android:id="@+id/pieChart"
                     android:layout_width="match_parent"
                     android:layout_height="300dp"
+                    android:visibility="visible"
                     android:layout_margin="16dp"
                     android:layout_gravity="center"/>
 
