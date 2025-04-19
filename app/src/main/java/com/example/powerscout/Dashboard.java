@@ -162,62 +162,107 @@ public class Dashboard extends BaseActivity {
         databaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot root) {
-                Map<String, Double> deviceEnergies = new HashMap<>();
 
-                // 1) Top-level "Bulb" reading
-                DataSnapshot raw = root.child("sensorData");
-                if (raw.exists()) {
-                    Double v = raw.child("voltage").getValue(Double.class);
-                    Double c = raw.child("current").getValue(Double.class);
-                    if (v != null && c != null) {
-                        deviceEnergies.put("Bulb", (v + c) * 10);
+                Map<String, Float> applianceTotals = new HashMap<>();
+
+                for (DataSnapshot wrapper : root.getChildren()) {
+                    
+                    if (!wrapper.hasChild("sensorData") || wrapper.getKey().equals("sensorData")) {
+                        continue;
                     }
-                }
 
-                // 2) Fake entry for "Washing Machine"
-                deviceEnergies.put("Washing Machine", 5.5);  // dummy data
+                    String deviceName = wrapper.child("deviceName").getValue(String.class);
+                    if (deviceName == null) deviceName = wrapper.getKey();
 
-                // 3) Real device-level readings
-                for (DataSnapshot deviceWrapper : root.getChildren()) {
-                    if (!deviceWrapper.getKey().equals("sensorData")
-                            && deviceWrapper.hasChild("sensorData")) {
+                    float sum = 0f;
+                    DataSnapshot inner = wrapper.child("sensorData");
 
-                        double totalDeviceEnergy = 0;
-                        DataSnapshot inner = deviceWrapper.child("sensorData");
-
-                        for (DataSnapshot reading : inner.getChildren()) {
+                    for (DataSnapshot reading : inner.getChildren()) {
+                        // Case A: direct voltage/current under this node
+                        if (reading.hasChild("voltage") && reading.hasChild("current")) {
                             Double v = reading.child("voltage").getValue(Double.class);
                             Double c = reading.child("current").getValue(Double.class);
                             if (v != null && c != null) {
-                                totalDeviceEnergy += (v + c) * 10;
+                                sum += (v + c) * 10;
                             }
                         }
-
-                        if (totalDeviceEnergy > 0) {
-                            deviceEnergies.put(deviceWrapper.getKey(), totalDeviceEnergy);
+                        // Case B: nested timestamp nodes under this child
+                        else {
+                            for (DataSnapshot tsNode : reading.getChildren()) {
+                                Double v = tsNode.child("voltage").getValue(Double.class);
+                                Double c = tsNode.child("current").getValue(Double.class);
+                                if (v != null && c != null) {
+                                    sum += (v + c) * 10;
+                                }
+                            }
                         }
                     }
+
+                    applianceTotals.put(deviceName, sum);
                 }
 
-                // Total for cost
-                double totalEnergy = 0;
-                for (double e : deviceEnergies.values()) totalEnergy += e;
-
-                todayUsageTextView .setText(String.format(Locale.getDefault(), "%.1f kWh", totalEnergy));
-                monthUsageTextView.setText(String.format(Locale.getDefault(), "%.1f kWh", totalEnergy));
-                costTextView.setText(String.format(Locale.getDefault(), "Cost: ₹%.2f", totalEnergy * RATE_PER_KWH));
-
-                // Pie Chart with appliance-level slices
-                List<PieEntry> pieEntries = new ArrayList<>();
-                for (Map.Entry<String, Double> entry : deviceEnergies.entrySet()) {
-                    pieEntries.add(new PieEntry(entry.getValue().floatValue(), entry.getKey()));
+                // Build and set the pie chart entries
+                ArrayList<PieEntry> pieEntries = new ArrayList<>();
+                for (Map.Entry<String, Float> e : applianceTotals.entrySet()) {
+                    pieEntries.add(new PieEntry(e.getValue(), e.getKey()));
                 }
                 updatePieChart(pieEntries);
 
-                // Bar chart can stay generic or follow similar logic
-                List<BarEntry> barEntries = new ArrayList<>();
-                barEntries.add(new BarEntry(0, (float) totalEnergy));
-                updateBarChart(barEntries, Collections.singletonList("Total"));
+
+                // —— 2) BAR CHART: last 5 timestamped readings ——————————————
+                DataSnapshot sensorData = root.child("sensorData");
+                if (!sensorData.exists()) return;
+
+                // find the one child under sensorData that holds timestamped readings
+                DataSnapshot tsWrapper = null;
+                for (DataSnapshot child : sensorData.getChildren()) {
+                    if (!child.hasChild("voltage") || !child.hasChild("current")) {
+                        tsWrapper = child;
+                        break;
+                    }
+                }
+                if (tsWrapper == null) return;
+
+                // collect & sort all timestamp nodes (ISO keys sort chronologically)
+                List<DataSnapshot> readings = new ArrayList<>();
+                for (DataSnapshot tsNode : tsWrapper.getChildren()) {
+                    readings.add(tsNode);
+                }
+                Collections.sort(readings, (a, b) -> a.getKey().compareTo(b.getKey()));
+
+                // take only the last 5 readings
+                int total = readings.size();
+                int start = Math.max(0, total - 5);
+
+                ArrayList<BarEntry> barEntries = new ArrayList<>();
+                ArrayList<String> labels     = new ArrayList<>();
+
+                for (int i = start; i < total; i++) {
+                    DataSnapshot r = readings.get(i);
+                    Double v = r.child("voltage").getValue(Double.class);
+                    Double c = r.child("current").getValue(Double.class);
+                    if (v == null || c == null) continue;
+
+                    float energy = (float)((v + c) * 10);
+                    barEntries.add(new BarEntry(i - start, energy));
+                    labels.add(r.getKey().replace('_', ':')); // e.g. "2025-04-18:14-53-45"
+                }
+
+                updateBarChart(barEntries, labels);
+
+                // finally, update usage & cost off the most recent bar
+                if (!barEntries.isEmpty()) {
+                    float latest = barEntries.get(barEntries.size() - 1).getY();
+                    todayUsageTextView .setText(
+                            String.format(Locale.getDefault(), "%.1f kWh", latest)
+                    );
+                    monthUsageTextView.setText(
+                            String.format(Locale.getDefault(), "%.1f kWh", latest)
+                    );
+                    costTextView.setText(
+                            String.format(Locale.getDefault(), "Cost: ₹%.2f", latest * RATE_PER_KWH)
+                    );
+                }
             }
 
             @Override
@@ -226,6 +271,8 @@ public class Dashboard extends BaseActivity {
             }
         });
     }
+
+
 
 
     private void updatePieChart(List<PieEntry> entries) {
