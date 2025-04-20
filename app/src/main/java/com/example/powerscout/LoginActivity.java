@@ -188,7 +188,7 @@ public class LoginActivity extends AppCompatActivity {
 
 
     private void passUidToESP8266(String uid) {
-        String esp8266Url = "http://192.168.62.24/sendUid";
+        String esp8266Url = "http://192.168.0.106/sendUid";
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, esp8266Url,
                 response -> {

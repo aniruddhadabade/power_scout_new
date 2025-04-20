@@ -42,6 +42,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -230,7 +231,9 @@ public class Dashboard extends BaseActivity {
                     Double c = r.child("current").getValue(Double.class);
                     if (v == null || c == null) continue;
 
-                    float energy = (float) (v * c)*1000; // in Watts
+                    if (c < 0.01) continue; // skip readings when bulb is OFF or current is negligible
+                    float energy = (float) (v * c) * 1000;
+
                     totalEnergy += energy;
 
                     // Add the entry for LED bulb
@@ -286,12 +289,6 @@ public class Dashboard extends BaseActivity {
             }
         });
     }
-
-
-
-
-
-
 
 
     private void updatePieChart(List<PieEntry> entries) {

@@ -45,7 +45,7 @@
 
     By using the Power Scout App, you agree to these Terms and Conditions.
 </string>
-    <string name="esp8266_url">http://192.168.62.24/getSensorData</string>
+    <string name="esp8266_url">http://192.168.0.106/getSensorData</string>
 
 
 </resources>
