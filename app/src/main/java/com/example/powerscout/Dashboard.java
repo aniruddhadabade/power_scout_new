@@ -159,14 +159,13 @@ public class Dashboard extends BaseActivity {
 
 
     private void fetchDataAndUpdateCharts() {
+        Log.d("Dashboard", "Starting fetchDataAndUpdateCharts()");
         databaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot root) {
-
                 Map<String, Float> applianceTotals = new HashMap<>();
 
                 for (DataSnapshot wrapper : root.getChildren()) {
-
                     if (!wrapper.hasChild("sensorData") || wrapper.getKey().equals("sensorData")) {
                         continue;
                     }
@@ -178,42 +177,30 @@ public class Dashboard extends BaseActivity {
                     DataSnapshot inner = wrapper.child("sensorData");
 
                     for (DataSnapshot reading : inner.getChildren()) {
-                        // Case A: direct voltage/current under this node
                         if (reading.hasChild("voltage") && reading.hasChild("current")) {
                             Double v = reading.child("voltage").getValue(Double.class);
                             Double c = reading.child("current").getValue(Double.class);
                             if (v != null && c != null) {
-                                sum += (v + c) / 10;
+                                sum += (v * c)*1000; // actual power calculation in watts
                             }
-                        }
-                        // Case B: nested timestamp nodes under this child
-                        else {
+                        } else {
                             for (DataSnapshot tsNode : reading.getChildren()) {
                                 Double v = tsNode.child("voltage").getValue(Double.class);
                                 Double c = tsNode.child("current").getValue(Double.class);
                                 if (v != null && c != null) {
-                                    sum += (v + c) / 10;
+                                    sum += (v * c)*1000; // actual power calculation in watts
                                 }
                             }
                         }
                     }
 
-                    applianceTotals.put(deviceName, sum);
+                    applianceTotals.put(deviceName, sum / 1000f); // convert to kWh if needed
                 }
 
-                // Build and set the pie chart entries
-                ArrayList<PieEntry> pieEntries = new ArrayList<>();
-                for (Map.Entry<String, Float> e : applianceTotals.entrySet()) {
-                    pieEntries.add(new PieEntry(e.getValue(), e.getKey()));
-                }
-                updatePieChart(pieEntries);
-
-
-                // —— 2) BAR CHART: last 5 timestamped readings ——————————————
+                // Prepare common readings list for bar and pie charts
                 DataSnapshot sensorData = root.child("sensorData");
                 if (!sensorData.exists()) return;
 
-                // find the one child under sensorData that holds timestamped readings
                 DataSnapshot tsWrapper = null;
                 for (DataSnapshot child : sensorData.getChildren()) {
                     if (!child.hasChild("voltage") || !child.hasChild("current")) {
@@ -223,19 +210,49 @@ public class Dashboard extends BaseActivity {
                 }
                 if (tsWrapper == null) return;
 
-                // collect & sort all timestamp nodes (ISO keys sort chronologically)
                 List<DataSnapshot> readings = new ArrayList<>();
                 for (DataSnapshot tsNode : tsWrapper.getChildren()) {
                     readings.add(tsNode);
                 }
                 Collections.sort(readings, (a, b) -> a.getKey().compareTo(b.getKey()));
 
-                // take only the last 5 readings
                 int total = readings.size();
                 int start = Math.max(0, total - 5);
 
+                // === Update Pie chart ===
+                ArrayList<PieEntry> pieEntries = new ArrayList<>();
+                float totalEnergy = 0f;
+
+                // Process the LED bulb readings
+                for (int i = start; i < total; i++) {
+                    DataSnapshot r = readings.get(i);
+                    Double v = r.child("voltage").getValue(Double.class);
+                    Double c = r.child("current").getValue(Double.class);
+                    if (v == null || c == null) continue;
+
+                    float energy = (float) (v * c)*1000; // in Watts
+                    totalEnergy += energy;
+
+                    // Add the entry for LED bulb
+                    String label = "LED Bulb";
+                    pieEntries.add(new PieEntry(energy, label));
+                }
+
+                // Add dummy washing machine entry (for example, assume it's consuming 500W)
+                float washingMachineEnergy = 100f; // Dummy energy consumption in Watts
+                totalEnergy += washingMachineEnergy;
+
+                // Add the washing machine entry
+                pieEntries.add(new PieEntry(washingMachineEnergy, "Washing Machine"));
+                pieEntries.add(new PieEntry(totalEnergy, "Total Consumption"));
+
+
+                // Update Pie chart with total energy
+                updatePieChart(pieEntries);
+
+                // === Update Bar chart ===
                 ArrayList<BarEntry> barEntries = new ArrayList<>();
-                ArrayList<String> labels     = new ArrayList<>();
+                ArrayList<String> labels = new ArrayList<>();
 
                 for (int i = start; i < total; i++) {
                     DataSnapshot r = readings.get(i);
@@ -243,26 +260,24 @@ public class Dashboard extends BaseActivity {
                     Double c = r.child("current").getValue(Double.class);
                     if (v == null || c == null) continue;
 
-                    float energy = (float)((v + c) / 10);
-                    barEntries.add(new BarEntry(i - start, energy));
-                    labels.add(r.getKey().replace('_', ':')); // e.g. "2025-04-18:14-53-45"
+                    float power = (float) (v * c)*1000; // in Watts
+                    barEntries.add(new BarEntry(i - start, power));
+                    labels.add(""); // Blank label or use device name here if desired
                 }
-
                 updateBarChart(barEntries, labels);
 
-                // finally, update usage & cost off the most recent bar
+                // Update usage and cost info
                 if (!barEntries.isEmpty()) {
-                    float latest = barEntries.get(barEntries.size() - 1).getY();
-                    todayUsageTextView .setText(
-                            String.format(Locale.getDefault(), "%.1f kWh", latest)
-                    );
-                    monthUsageTextView.setText(
-                            String.format(Locale.getDefault(), "%.1f kWh", latest)
-                    );
-                    costTextView.setText(
-                            String.format(Locale.getDefault(), "Cost: ₹%.2f", latest * RATE_PER_KWH)
-                    );
+                    float latest = barEntries.get(barEntries.size() - 1).getY(); // in Watts
+                    float kWh = latest / 1000f;
+                    todayUsageTextView.setText(String.format(Locale.getDefault(), "%.2f kWh", kWh));
+                    monthUsageTextView.setText(String.format(Locale.getDefault(), "%.2f kWh", kWh));
+                    costTextView.setText(String.format(Locale.getDefault(), "Cost: ₹%.2f", kWh * RATE_PER_KWH));
                 }
+
+                // Display total energy for Pie chart (in kWh)
+                float totalEnergyInKWh = totalEnergy / 1000f; // Convert to kWh
+                Log.d("Dashboard", "Total energy consumption: " + totalEnergyInKWh + " kWh");
             }
 
             @Override
@@ -271,6 +286,10 @@ public class Dashboard extends BaseActivity {
             }
         });
     }
+
+
+
+
 
 
 
@@ -295,15 +314,15 @@ public class Dashboard extends BaseActivity {
         pieChart.setCenterText("Appliance Usage");
         pieChart.setCenterTextSize(16f);
 
-        // Legend tweaks
-        Legend legend = pieChart.getLegend();
-        legend.setEnabled(true);
-        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
-        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
-        legend.setOrientation(Legend.LegendOrientation.HORIZONTAL);
-        legend.setDrawInside(false);
-        legend.setWordWrapEnabled(true);
-        legend.setTextSize(12f);
+
+//        Legend legend = pieChart.getLegend();
+//        legend.setEnabled(true);
+//        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+//        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+//        legend.setOrientation(Legend.LegendOrientation.HORIZONTAL);
+//        legend.setDrawInside(false);
+//        legend.setWordWrapEnabled(true);
+//        legend.setTextSize(12f);
 
         pieChart.setExtraOffsets(5, 5, 5, 5); // Reduced offset to prevent compression
         pieChart.getDescription().setEnabled(false);
