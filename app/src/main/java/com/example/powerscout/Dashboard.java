@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import java.text.ParseException;
 import com.github.mikephil.charting.charts.BarChart;
@@ -28,6 +29,15 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
+import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+import com.github.mikephil.charting.utils.ColorTemplate;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -57,7 +67,7 @@ public class Dashboard extends BaseActivity {
     private FirebaseFirestore firestore;
     private FirebaseAuth firebaseAuth;
     private FirebaseUser currentUser;
-    private PieChart pieChart;
+    private LineChart lineChartAllTime;
     private BarChart barChart;
     private List<BarEntry> barEntries = new ArrayList<>();
     private DatabaseReference databaseRef;
@@ -91,7 +101,7 @@ public class Dashboard extends BaseActivity {
         textMonth = findViewById(R.id.textMonth);
         textYear = findViewById(R.id.textYear);
         textTotal = findViewById(R.id.textTotal);
-        pieChart = findViewById(R.id.pieChart);
+        lineChartAllTime = findViewById(R.id.lineChartAllTime);
         barChart = findViewById(R.id.barChart);
 
 //        >...
@@ -164,57 +174,52 @@ public class Dashboard extends BaseActivity {
             @Override
             public void onDataChange(DataSnapshot root) {
 
+                // 1) AGGREGATE ALL‑TIME USAGE PER DEVICE
                 Map<String, Float> applianceTotals = new HashMap<>();
-
                 for (DataSnapshot wrapper : root.getChildren()) {
-
                     if (!wrapper.hasChild("sensorData") || wrapper.getKey().equals("sensorData")) {
                         continue;
                     }
-
                     String deviceName = wrapper.child("deviceName").getValue(String.class);
                     if (deviceName == null) deviceName = wrapper.getKey();
 
                     float sum = 0f;
                     DataSnapshot inner = wrapper.child("sensorData");
-
                     for (DataSnapshot reading : inner.getChildren()) {
-                        // Case A: direct voltage/current under this node
+                        // direct v/c
                         if (reading.hasChild("voltage") && reading.hasChild("current")) {
                             Double v = reading.child("voltage").getValue(Double.class);
                             Double c = reading.child("current").getValue(Double.class);
-                            if (v != null && c != null) {
-                                sum += (v + c) / 10;
-                            }
+                            if (v != null && c != null) sum += (v + c) / 10;
                         }
-                        // Case B: nested timestamp nodes under this child
+                        // nested timestamps
                         else {
                             for (DataSnapshot tsNode : reading.getChildren()) {
                                 Double v = tsNode.child("voltage").getValue(Double.class);
                                 Double c = tsNode.child("current").getValue(Double.class);
-                                if (v != null && c != null) {
-                                    sum += (v + c) / 10;
-                                }
+                                if (v != null && c != null) sum += (v + c) / 10;
                             }
                         }
                     }
-
                     applianceTotals.put(deviceName, sum);
                 }
 
-                // Build and set the pie chart entries
-                ArrayList<PieEntry> pieEntries = new ArrayList<>();
+                // 2) BUILD & SHOW ALL‑TIME LINE CHART
+                List<Entry> allTimeEntries = new ArrayList<>();
+                List<String> allTimeLabels = new ArrayList<>();
+                int idx = 0;
                 for (Map.Entry<String, Float> e : applianceTotals.entrySet()) {
-                    pieEntries.add(new PieEntry(e.getValue(), e.getKey()));
+                    allTimeEntries.add(new Entry(idx, e.getValue()));
+                    allTimeLabels.add(e.getKey());
+                    idx++;
                 }
-                updatePieChart(pieEntries);
+                updateAllTimeLineChart(allTimeEntries, allTimeLabels);
 
-
-                // —— 2) BAR CHART: last 5 timestamped readings ——————————————
+                // 3) BUILD & SHOW LAST‑5 BAR CHART (as before)
                 DataSnapshot sensorData = root.child("sensorData");
                 if (!sensorData.exists()) return;
 
-                // find the one child under sensorData that holds timestamped readings
+                // find the wrapper with timestamped readings
                 DataSnapshot tsWrapper = null;
                 for (DataSnapshot child : sensorData.getChildren()) {
                     if (!child.hasChild("voltage") || !child.hasChild("current")) {
@@ -224,20 +229,17 @@ public class Dashboard extends BaseActivity {
                 }
                 if (tsWrapper == null) return;
 
-                // collect & sort all timestamp nodes (ISO keys sort chronologically)
                 List<DataSnapshot> readings = new ArrayList<>();
                 for (DataSnapshot tsNode : tsWrapper.getChildren()) {
                     readings.add(tsNode);
                 }
                 Collections.sort(readings, (a, b) -> a.getKey().compareTo(b.getKey()));
 
-                // take only the last 5 readings
                 int total = readings.size();
                 int start = Math.max(0, total - 5);
 
                 ArrayList<BarEntry> barEntries = new ArrayList<>();
                 ArrayList<String> labels     = new ArrayList<>();
-
                 for (int i = start; i < total; i++) {
                     DataSnapshot r = readings.get(i);
                     Double v = r.child("voltage").getValue(Double.class);
@@ -246,15 +248,14 @@ public class Dashboard extends BaseActivity {
 
                     float energy = (float)((v + c) / 10);
                     barEntries.add(new BarEntry(i - start, energy));
-                    labels.add(r.getKey().replace('_', ':')); // e.g. "2025-04-18:14-53-45"
+                    labels.add(r.getKey().replace('_', ':'));
                 }
-
                 updateBarChart(barEntries, labels);
 
-                // finally, update usage & cost off the most recent bar
+                // 4) UPDATE TODAY & MONTH USAGE
                 if (!barEntries.isEmpty()) {
                     float latest = barEntries.get(barEntries.size() - 1).getY();
-                    todayUsageTextView .setText(
+                    todayUsageTextView.setText(
                             String.format(Locale.getDefault(), "%.1f kWh", latest)
                     );
                     monthUsageTextView.setText(
@@ -276,37 +277,46 @@ public class Dashboard extends BaseActivity {
 
 
 
-    private void updatePieChart(List<PieEntry> entries) {
+
+    private void updateAllTimeLineChart(List<Entry> entries, List<String> labels) {
         if (entries.isEmpty()) {
-            pieChart.clear();
-            pieChart.invalidate();
+            lineChartAllTime.clear();
+            lineChartAllTime.invalidate();
             return;
         }
 
-        PieDataSet dataSet = new PieDataSet(entries, "Usage");
-        dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
-        dataSet.setValueTextSize(12f);
-        dataSet.setValueTextColor(Color.WHITE);
+        LineDataSet set = new LineDataSet(entries, "All‑Time kWh per Device");
+        set.setLineWidth(2f);
+        set.setCircleRadius(4f);
+        set.setMode(LineDataSet.Mode.LINEAR);
+        set.setDrawValues(true);
+        set.setValueTextSize(10f);
+        set.setColor(ColorTemplate.MATERIAL_COLORS[1]);
+        set.setCircleColor(ColorTemplate.MATERIAL_COLORS[1]);
 
-        PieData data = new PieData(dataSet);
-        data.setValueFormatter(new PercentFormatter(pieChart));
-        pieChart.setUsePercentValues(true);
-        pieChart.setData(data);
+        LineData data = new LineData(set);
+        lineChartAllTime.setData(data);
 
-        pieChart.setDrawHoleEnabled(false);
-        pieChart.getDescription().setEnabled(false);
-        pieChart.setEntryLabelTextSize(12f);
-        pieChart.setEntryLabelColor(Color.BLACK);
-        pieChart.setCenterText("All‑Time Usage");
+        XAxis x = lineChartAllTime.getXAxis();
+        x.setValueFormatter(new IndexAxisValueFormatter(labels));
+        x.setGranularity(1f);
+        x.setPosition(XAxis.XAxisPosition.BOTTOM);
+        x.setDrawGridLines(false);
 
-        Legend legend = pieChart.getLegend();
-        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
-        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
-        legend.setOrientation(Legend.LegendOrientation.HORIZONTAL);
-        legend.setDrawInside(false);
+        YAxis left = lineChartAllTime.getAxisLeft();
+        left.setAxisMinimum(0f);
+        float maxY = (float) entries.stream()
+                .mapToDouble(Entry::getY)
+                .max()
+                .orElse(1.0);
+        left.setAxisMaximum(maxY * 1.2f);
+        lineChartAllTime.getAxisRight().setEnabled(false);
 
-        pieChart.animateY(800);
-        pieChart.invalidate();
+        lineChartAllTime.getDescription().setEnabled(false);
+        lineChartAllTime.getLegend().setEnabled(false);
+
+        lineChartAllTime.animateX(800);
+        lineChartAllTime.invalidate();
     }
 
     private void updateBarChart(List<BarEntry> entries, List<String> labels) {

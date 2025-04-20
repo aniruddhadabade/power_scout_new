@@ -146,13 +146,11 @@
                 </androidx.cardview.widget.CardView>
 
                 <!-- Pie Chart -->
-                <com.github.mikephil.charting.charts.PieChart
-                    android:id="@+id/pieChart"
+                <com.github.mikephil.charting.charts.LineChart
+                    android:id="@+id/lineChartAllTime"
                     android:layout_width="match_parent"
-                    android:layout_height="300dp"
-                    android:visibility="visible"
-                    android:layout_margin="16dp"
-                    android:layout_gravity="center"/>
+                    android:layout_height="250dp"
+                    android:layout_margin="16dp"/>
 
                 <!-- CardView with Month, Year, Total Tabs and Bar Chart -->
                 <androidx.cardview.widget.CardView
