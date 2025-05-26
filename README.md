@@ -59,7 +59,7 @@
 
 Use the Admin Dashboard to manage users, appliances, and monitor usage statistics.
 
-👉 [**Access Admin Panel**](https://your-admin-panel-link.com)  
+👉 [**Access Admin Panel**](https://github.com/aniruddhadabade/Power-scout-Admin)  
 
 
 ---
